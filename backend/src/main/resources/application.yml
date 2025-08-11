@@ -1,0 +1,69 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: dcf-calculator-backend
+  
+  # Database configuration (H2 in-memory for development)
+  datasource:
+    url: jdbc:h2:mem:dcfdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: password
+  
+  # JPA configuration
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+  
+  # H2 Console (for development)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # CORS configuration
+  web:
+    cors:
+      allowed-origins: "http://localhost:3000"
+      allowed-methods: "GET,POST,PUT,DELETE,OPTIONS"
+      allowed-headers: "*"
+      allow-credentials: true
+
+  # Enable scheduling
+  task:
+    scheduling:
+      enabled: true
+
+# JWT configuration
+app:
+  jwt:
+    secret: dcf-calculator-secret-key-change-in-production
+    expiration: 86400000 # 24 hours in milliseconds
+
+# Firebase configuration (will be set via environment variables)
+firebase:
+  project-id: ${FIREBASE_PROJECT_ID:dcf-calculator-dev}
+  credentials-path: ${FIREBASE_CREDENTIALS_PATH:}
+
+# Scraping configuration
+scraping:
+  timeout-seconds: 30
+  cache-days: 7
+  enable-real-scraping: false # Set to true in production with proper rate limiting
+  max-retries: 3
+  retry-delay-ms: 1000
+  request-delay-ms: 2000
+  max-requests-per-minute: 20
+
+# Logging
+logging:
+  level:
+    com.dcf: DEBUG
+    org.springframework.security: DEBUG
