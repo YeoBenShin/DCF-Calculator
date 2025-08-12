@@ -89,7 +89,7 @@ class DCFCalculationServiceTest {
 
     @Test
     @DisplayName("Should throw exception for invalid DCF input")
-    void testCalculateDCFInvalidInput() {
+    void testCalculateDCFInvalidInput() throws FinancialDataException {
         // Arrange
         when(dcfValidationUtil.validateDCFInput(mockDCFInput)).thenReturn("Invalid input");
 

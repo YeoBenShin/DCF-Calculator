@@ -77,7 +77,7 @@ class FinancialDataUpdateServiceTest {
 
     @Test
     @DisplayName("Should handle empty stale data list")
-    void testUpdateStaleFinancialDataEmpty() {
+    void testUpdateStaleFinancialDataEmpty() throws FinancialDataException {
         // Arrange
         when(financialDataRepository.findStaleData(any(LocalDate.class)))
             .thenReturn(Collections.emptyList());
@@ -92,7 +92,7 @@ class FinancialDataUpdateServiceTest {
 
     @Test
     @DisplayName("Should cleanup old financial data")
-    void testCleanupOldFinancialData() {
+    void testCleanupOldFinancialData() throws FinancialDataException {
         // Arrange
         when(financialDataRepository.deleteStaleData(any(LocalDate.class))).thenReturn(5);
 
@@ -163,7 +163,7 @@ class FinancialDataUpdateServiceTest {
 
     @Test
     @DisplayName("Should calculate data freshness statistics correctly")
-    void testGetDataFreshnessStats() {
+    void testGetDataFreshnessStats() throws FinancialDataException {
         // Arrange
         when(financialDataRepository.countAllRecords()).thenReturn(100L);
         
@@ -191,7 +191,7 @@ class FinancialDataUpdateServiceTest {
 
     @Test
     @DisplayName("Should handle zero records in statistics")
-    void testGetDataFreshnessStatsZeroRecords() {
+    void testGetDataFreshnessStatsZeroRecords() throws FinancialDataException {
         // Arrange
         when(financialDataRepository.countAllRecords()).thenReturn(0L);
         when(financialDataRepository.findStaleData(any(LocalDate.class)))
@@ -213,7 +213,7 @@ class FinancialDataUpdateServiceTest {
 
     @Test
     @DisplayName("Should handle repository exceptions gracefully")
-    void testHandleRepositoryExceptions() {
+    void testHandleRepositoryExceptions() throws FinancialDataException {
         // Arrange
         when(financialDataRepository.findStaleData(any(LocalDate.class)))
             .thenThrow(new RuntimeException("Database error"));

@@ -36,12 +36,14 @@ dcf-calculator/
 ```bash
 cd frontend
 npm install
+npm run build
 npm start
 ```
 
 ### Backend
 ```bash
 cd backend
+mvn clean compile
 mvn spring-boot:run
 ```
 
@@ -58,5 +60,5 @@ mvn spring-boot:run
 
 - **Frontend:** React, TypeScript, Recharts, Axios
 - **Backend:** Spring Boot, Spring Security, JWT, JSoup
-- **Database:** Firebase
+- **Database:** Supabase
 - **Testing:** Jest, React Testing Library, JUnit
