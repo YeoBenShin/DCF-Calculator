@@ -8,9 +8,16 @@ spring:
   # Database configuration
   datasource:
     url: ${SUPABASE_DATABASE_URL}
-    driver-class-name: org.postgresql.Driver
     username: ${SUPABASE_DB_USERNAME}
     password: ${SUPABASE_DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 5
+      minimum-idle: 1
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      leak-detection-threshold: 60000
   
   # JPA configuration
   jpa:
