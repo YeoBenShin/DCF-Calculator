@@ -35,8 +35,8 @@ public class AuthenticationService {
     private UserRepository userRepository;
 
     public AuthenticationService(
-            @Value("${app.jwt.secret:defaultSecretKeyThatShouldBeChangedInProduction}") String jwtSecretString,
-            @Value("${app.jwt.expiration:86400000}") long jwtExpirationMs) {
+            @Value("${JWT_SECRET:defaultSecretKeyThatShouldBeChangedInProduction}") String jwtSecretString,
+            @Value("${app.jwt.expiration:3600}") long jwtExpirationMs) {
         this.jwtSecret = Keys.hmacShaKeyFor(jwtSecretString.getBytes());
         this.jwtExpirationMs = jwtExpirationMs;
         this.passwordEncoder = new BCryptPasswordEncoder();

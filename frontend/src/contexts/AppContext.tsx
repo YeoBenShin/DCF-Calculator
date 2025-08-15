@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useReducer, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, ReactNode, useCallback } from 'react';
 import { User } from '../types';
 
 // Global app state interface
@@ -94,26 +94,26 @@ interface AppProviderProps {
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(appReducer, initialState);
 
-  // Helper functions
-  const setLoading = (isLoading: boolean, message?: string) => {
+  // Helper functions - memoized to prevent infinite re-renders
+  const setLoading = useCallback((isLoading: boolean, message?: string) => {
     dispatch({ type: 'SET_LOADING', payload: { isLoading, message } });
-  };
+  }, []);
 
-  const setError = (error: string | null) => {
+  const setError = useCallback((error: string | null) => {
     dispatch({ type: 'SET_ERROR', payload: error });
-  };
+  }, []);
 
-  const clearError = () => {
+  const clearError = useCallback(() => {
     dispatch({ type: 'CLEAR_ERROR' });
-  };
+  }, []);
 
-  const setUser = (user: User | null) => {
+  const setUser = useCallback((user: User | null) => {
     dispatch({ type: 'SET_USER', payload: user });
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     dispatch({ type: 'LOGOUT' });
-  };
+  }, []);
 
   const value: AppContextType = {
     state,

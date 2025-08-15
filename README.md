@@ -54,12 +54,3 @@ npm start
 cd backend
 mvn clean compile
 mvn spring-boot:run
-
-⸻
-
-🤝 Contributing
-
-We welcome contributions!
-Please fork this repository, create a new branch for your feature, and submit a pull request.
-
-⸻
