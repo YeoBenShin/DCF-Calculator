@@ -152,7 +152,7 @@ public class FinancialDataController {
         dto.setEps(financialData.getEps());
         dto.setTotalDebt(financialData.getTotalDebt());
         dto.setOrdinarySharesNumber(financialData.getOrdinarySharesNumber());
-        dto.setDateFetched(financialData.getDateFetched());
+        dto.setDateFetched(financialData.getDateFetched()); // This will use the LocalDate overload
         return dto;
     }
 
