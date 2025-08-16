@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { DCFOutput, FinancialData, DCFInput } from '../../types';
+import { watchlistService } from '../../services/watchlistService';
+import { useApp } from '../../contexts/AppContext';
 import FairValueCard from './FairValueCard';
 import FinancialCharts from './FinancialCharts';
 import './ResultsPage.css';
@@ -14,7 +16,10 @@ interface LocationState {
 const ResultsPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { setError } = useApp();
   const state = location.state as LocationState;
+  const [isAddingToWatchlist, setIsAddingToWatchlist] = useState(false);
+  const [addedToWatchlist, setAddedToWatchlist] = useState(false);
 
   // Redirect to calculator if no data is available
   React.useEffect(() => {
@@ -40,9 +45,22 @@ const ResultsPage: React.FC = () => {
     navigate('/calculator');
   };
 
-  const handleAddToWatchlist = () => {
-    // This will be implemented in a later task
-    console.log('Add to watchlist functionality coming soon');
+  const handleAddToWatchlist = async () => {
+    if (!state?.dcfResult?.ticker) {
+      setError('No ticker available to add to watchlist');
+      return;
+    }
+
+    setIsAddingToWatchlist(true);
+    
+    try {
+      await watchlistService.addToWatchlist(state.dcfResult.ticker);
+      setAddedToWatchlist(true);
+    } catch (error: any) {
+      setError(error.message || 'Failed to add to watchlist');
+    } finally {
+      setIsAddingToWatchlist(false);
+    }
   };
 
   return (
@@ -80,8 +98,15 @@ const ResultsPage: React.FC = () => {
             <button 
               onClick={handleAddToWatchlist}
               className="action-button secondary"
+              disabled={isAddingToWatchlist || addedToWatchlist}
+              data-testid="add-to-watchlist-button"
             >
-              Add to Watchlist
+              {isAddingToWatchlist 
+                ? 'Adding...' 
+                : addedToWatchlist 
+                  ? 'Added to Watchlist' 
+                  : 'Add to Watchlist'
+              }
             </button>
           </div>
         </div>
