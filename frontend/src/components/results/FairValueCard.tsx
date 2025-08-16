@@ -56,10 +56,10 @@ const FairValueCard: React.FC<FairValueCardProps> = ({ dcfResult, dcfInput }) =>
   const upside = calculateUpside();
 
   return (
-    <div className="fair-value-card">
+    <div className="fair-value-card" data-testid="fair-value-card">
       <div className="card-header">
         <h2>Fair Value Analysis</h2>
-        <div className={`valuation-badge ${getValuationColor(dcfResult.valuation)}`}>
+        <div className={`valuation-badge ${getValuationColor(dcfResult.valuation)} ${dcfResult.valuation.toLowerCase()}`}>
           <span className="valuation-icon">{getValuationIcon(dcfResult.valuation)}</span>
           <span className="valuation-text">{dcfResult.valuation}</span>
         </div>
@@ -110,6 +110,9 @@ const FairValueCard: React.FC<FairValueCardProps> = ({ dcfResult, dcfInput }) =>
         </div>
 
         <div className="disclaimer">
+          <p>
+            <strong>Data Source:</strong> Financial data is sourced from publicly available information and may include estimated values for demonstration purposes.
+          </p>
           <p>
             <strong>Disclaimer:</strong> This analysis is for educational purposes only and should not be considered as investment advice.
             Please conduct your own research and consult with a financial advisor before making investment decisions.
