@@ -2,6 +2,7 @@ import axios from 'axios';
 import { AuthRequest, AuthResponse, ApiResponse } from '../types';
 import { API_CONFIG, API_ENDPOINTS, ERROR_MESSAGES, APP_CONFIG } from '../config/api';
 import { retryApiCall, extractErrorMessage, formatApiResponse } from '../utils/apiUtils';
+import { error } from 'console';
 
 // Global error handler function - will be set by App component
 let globalErrorHandler: ((error: string) => void) | null = null;
@@ -75,8 +76,7 @@ export const authService = {
       const response = await retryApiCall(() => 
         apiClient.post<ApiResponse<AuthResponse>>(API_ENDPOINTS.AUTH.LOGIN, credentials)
       );
-      
-      return formatApiResponse<AuthResponse>(response);
+      return {...formatApiResponse<AuthResponse>(response)};
     } catch (error: any) {
       const errorMessage = extractErrorMessage(error);
       throw new Error(errorMessage);

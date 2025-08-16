@@ -1,6 +1,6 @@
 // User related types
 export interface User {
-  user_id: string;
+  userId: string;
   email: string;
   watchlist: string[];
 }

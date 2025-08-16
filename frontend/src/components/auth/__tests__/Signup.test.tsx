@@ -121,7 +121,7 @@ describe('Signup Component', () => {
     const mockOnSignup = jest.fn();
     const mockResponse = {
       token: 'mock-token',
-      user: { user_id: '1', email: 'test@example.com', watchlist: [] }
+      user: { userId: '1', email: 'test@example.com', watchlist: [] }
     };
     
     mockAuthService.signup.mockResolvedValue(mockResponse);

@@ -39,7 +39,7 @@ public class DCFInput {
     @Max(value = 20, message = "Projection years must be at most 20")
     private Integer projectionYears = 5; // Default to 5 years
 
-    @Column(name = "user_id")
+    @Column(name = "userId")
     private String userId;
 
     @Column(name = "created_at")

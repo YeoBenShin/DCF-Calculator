@@ -12,7 +12,7 @@ describe('AuthService Utility Functions', () => {
     expect(localStorage.getItem('authToken')).toBe('test-token');
 
     // Test setting and getting user
-    const mockUser = { user_id: '1', email: 'test@example.com', watchlist: [] };
+    const mockUser = { userId: '1', email: 'test@example.com', watchlist: [] };
     localStorage.setItem('user', JSON.stringify(mockUser));
     expect(JSON.parse(localStorage.getItem('user') || '{}')).toEqual(mockUser);
 

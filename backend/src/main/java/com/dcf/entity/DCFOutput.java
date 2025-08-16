@@ -36,7 +36,7 @@ public class DCFOutput {
     @Column(name = "dcf_input_id")
     private String dcfInputId;
 
-    @Column(name = "user_id")
+    @Column(name = "userId")
     private String userId;
 
     @Column(name = "calculated_at")

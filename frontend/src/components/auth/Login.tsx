@@ -70,11 +70,9 @@ const Login: React.FC = () => {
     
     try {
       const response: AuthResponse = await authService.login(formData);
-      
       // Store token in localStorage
       localStorage.setItem('authToken', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
-      
+      localStorage.setItem('user', JSON.stringify(response.user.userId));
       // Update global state
       setUser(response.user);
       

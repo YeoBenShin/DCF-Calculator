@@ -59,7 +59,7 @@ The architecture follows a client-server model with the following key components
 ### User
 ```json
 {
-  "user_id": "uuid",
+  "userId": "uuid",
   "email": "string",
   "password_hash": "string",
   "watchlist": ["AAPL", "GOOGL"]

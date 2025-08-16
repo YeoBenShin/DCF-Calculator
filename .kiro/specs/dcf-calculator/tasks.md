@@ -8,7 +8,7 @@
 
 - [ ] 2. Implement data models and validation
   - [x] 2.1 Create User data model with validation
-    - Write User class/interface with fields: user_id, email, password_hash, watchlist
+    - Write User class/interface with fields: userId, email, password_hash, watchlist
     - Implement email validation and password hashing utilities
     - Write unit tests for User model validation
     - _Requirements: 1.3_

@@ -88,12 +88,12 @@ export const isRetryableError = (error: AxiosError): boolean => {
 
 // Utility function to format API response
 export const formatApiResponse = <T>(response: AxiosResponse<any>): T => {
-  if (response.data.success && response.data.data !== undefined) {
-    return response.data.data;
-  }
+  // if (response.data.success && response.data.data !== undefined) {
+    return response.data;
+  // }
   
-  const error = new Error(response.data.error || 'API response format error');
-  throw error;
+  // const error = new Error(response.data.error || 'API response format error');
+  // throw error;
 };
 
 // Utility function to validate ticker symbol

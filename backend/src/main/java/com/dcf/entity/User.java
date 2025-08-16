@@ -26,7 +26,7 @@ public class User {
     private String passwordHash;
 
     @ElementCollection
-    @CollectionTable(name = "user_watchlist", joinColumns = @JoinColumn(name = "user_id"))
+    @CollectionTable(name = "user_watchlist", joinColumns = @JoinColumn(name = "userId"))
     @Column(name = "ticker")
     private List<String> watchlist = new ArrayList<>();
 
