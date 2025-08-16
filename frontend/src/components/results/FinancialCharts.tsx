@@ -15,6 +15,9 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financialData }) => {
 
   // Transform financial data into chart format
   const transformDataToChart = (data: number[], label: string): ChartDataPoint[] => {
+    if (data == undefined) {
+      return []
+    }
     return data.map((value, index) => ({
       year: `Year ${index + 1}`,
       value: value
