@@ -34,15 +34,15 @@ export interface FinancialData {
 // DCF calculation types
 export interface DCFInput {
   ticker: string;
-  discount_rate: number;
-  growth_rate: number;
-  terminal_growth_rate: number;
+  discountRate: number;
+  growthRate: number;
+  terminalGrowthRate: number;
 }
 
 export interface DCFOutput {
   ticker: string;
-  fair_value_per_share: number;
-  current_price: number;
+  fairValuePerShare: number;
+  currentPrice: number;
   valuation: 'Undervalued' | 'Overvalued' | 'Fair Value';
 }
 

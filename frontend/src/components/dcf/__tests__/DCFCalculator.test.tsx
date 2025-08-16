@@ -34,8 +34,8 @@ describe('DCFCalculator', () => {
     expect(screen.getByRole('button', { name: /calculate fair value/i })).toBeInTheDocument();
     
     // Check that the specific input fields exist by ID
-    expect(document.getElementById('growth_rate')).toBeInTheDocument();
-    expect(document.getElementById('terminal_growth_rate')).toBeInTheDocument();
+    expect(document.getElementById('growthRate')).toBeInTheDocument();
+    expect(document.getElementById('terminalGrowthRate')).toBeInTheDocument();
     
     // Check that the form sections are rendered
     expect(screen.getByText('Stock Information')).toBeInTheDocument();
@@ -146,7 +146,7 @@ describe('DCFCalculator', () => {
       
       const tickerInput = screen.getByLabelText(/stock ticker symbol/i);
       const searchButton = screen.getByRole('button', { name: /search/i });
-      const growthRateInput = document.getElementById('growth_rate') as HTMLInputElement;
+      const growthRateInput = document.getElementById('growthRate') as HTMLInputElement;
       
       fireEvent.change(tickerInput, { target: { value: 'AAPL' } });
       fireEvent.click(searchButton);

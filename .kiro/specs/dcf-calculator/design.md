@@ -88,9 +88,9 @@ The architecture follows a client-server model with the following key components
 ```json
 {
   "ticker": "AAPL",
-  "discount_rate": 8.5,
-  "growth_rate": 12,
-  "terminal_growth_rate": 2.5
+  "discountRate": 8.5,
+  "growthRate": 12,
+  "terminalGrowthRate": 2.5
 }
 ```
 

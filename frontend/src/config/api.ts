@@ -13,8 +13,8 @@ export const API_ENDPOINTS = {
     SIGNUP: '/auth/signup',
   },
   FINANCIAL: {
-    GET_DATA: '/financials',
-    CALCULATE_DCF: '/calculateDCF',
+    GET_DATA: 'financials',
+    CALCULATE_DCF: 'dcf/calculate',
   },
   WATCHLIST: {
     GET: '/watchlist',

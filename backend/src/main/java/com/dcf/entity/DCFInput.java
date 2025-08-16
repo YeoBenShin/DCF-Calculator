@@ -16,19 +16,19 @@ public class DCFInput {
     @Size(min = 1, max = 10, message = "Ticker symbol must be between 1 and 10 characters")
     private String ticker;
 
-    @Column(name = "discount_rate", nullable = false)
+    @Column(name = "discountRate", nullable = false)
     @NotNull(message = "Discount rate is required")
     @DecimalMin(value = "0.0", message = "Discount rate must be positive")
     @DecimalMax(value = "100.0", message = "Discount rate must be less than 100%")
     private Double discountRate;
 
-    @Column(name = "growth_rate", nullable = false)
+    @Column(name = "growthRate", nullable = false)
     @NotNull(message = "Growth rate is required")
     @DecimalMin(value = "-100.0", message = "Growth rate must be greater than -100%")
     @DecimalMax(value = "1000.0", message = "Growth rate must be less than 1000%")
     private Double growthRate;
 
-    @Column(name = "terminal_growth_rate", nullable = false)
+    @Column(name = "terminalGrowthRate", nullable = false)
     @NotNull(message = "Terminal growth rate is required")
     @DecimalMin(value = "0.0", message = "Terminal growth rate must be positive")
     @DecimalMax(value = "10.0", message = "Terminal growth rate must be less than 10%")

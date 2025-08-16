@@ -9,7 +9,7 @@ interface LocationState {
   dcfResult: DCFOutput;
   financialData: FinancialData;
   dcfInput: DCFInput;
-}
+} 
 
 const ResultsPage: React.FC = () => {
   const location = useLocation();

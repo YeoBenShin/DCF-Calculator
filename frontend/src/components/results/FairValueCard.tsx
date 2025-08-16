@@ -8,6 +8,11 @@ interface FairValueCardProps {
 }
 
 const FairValueCard: React.FC<FairValueCardProps> = ({ dcfResult, dcfInput }) => {
+  // Debug logging to see what we're actually receiving
+  console.log('DCF Result received:', dcfResult);
+  console.log('Fair Value Per Share:', dcfResult.fairValuePerShare, typeof dcfResult.fairValuePerShare);
+  console.log('Current Price:', dcfResult.currentPrice, typeof dcfResult.currentPrice);
+
   const getValuationColor = (valuation: string): string => {
     switch (valuation) {
       case 'Undervalued':
@@ -34,8 +39,18 @@ const FairValueCard: React.FC<FairValueCardProps> = ({ dcfResult, dcfInput }) =>
     }
   };
 
+  // Safely convert values to numbers
+  const fairValue = typeof dcfResult.fairValuePerShare === 'number'
+    ? dcfResult.fairValuePerShare
+    : parseFloat(dcfResult.fairValuePerShare as any) || 0;
+
+  const currentPrice = typeof dcfResult.currentPrice === 'number'
+    ? dcfResult.currentPrice
+    : parseFloat(dcfResult.currentPrice as any) || 0;
+
   const calculateUpside = (): number => {
-    return ((dcfResult.fair_value_per_share - dcfResult.current_price) / dcfResult.current_price) * 100;
+    if (currentPrice === 0) return 0;
+    return ((fairValue - currentPrice) / currentPrice) * 100;
   };
 
   const upside = calculateUpside();
@@ -55,16 +70,16 @@ const FairValueCard: React.FC<FairValueCardProps> = ({ dcfResult, dcfInput }) =>
           <div className="price-item">
             <label>Fair Value</label>
             <div className="price-value primary">
-              ${dcfResult.fair_value_per_share.toFixed(2)}
+              ${fairValue.toFixed(2)}
             </div>
           </div>
-          
+
           <div className="price-divider">vs</div>
-          
+
           <div className="price-item">
             <label>Current Price</label>
             <div className="price-value secondary">
-              ${dcfResult.current_price.toFixed(2)}
+              ${currentPrice.toFixed(2)}
             </div>
           </div>
         </div>
@@ -81,22 +96,22 @@ const FairValueCard: React.FC<FairValueCardProps> = ({ dcfResult, dcfInput }) =>
           <div className="parameters-grid">
             <div className="parameter-item">
               <label>Discount Rate</label>
-              <span>{dcfInput.discount_rate}%</span>
+              <span>{dcfInput.discountRate}%</span>
             </div>
             <div className="parameter-item">
               <label>Growth Rate</label>
-              <span>{dcfInput.growth_rate}%</span>
+              <span>{dcfInput.growthRate}%</span>
             </div>
             <div className="parameter-item">
               <label>Terminal Growth Rate</label>
-              <span>{dcfInput.terminal_growth_rate}%</span>
+              <span>{dcfInput.terminalGrowthRate}%</span>
             </div>
           </div>
         </div>
 
         <div className="disclaimer">
           <p>
-            <strong>Disclaimer:</strong> This analysis is for educational purposes only and should not be considered as investment advice. 
+            <strong>Disclaimer:</strong> This analysis is for educational purposes only and should not be considered as investment advice.
             Please conduct your own research and consult with a financial advisor before making investment decisions.
           </p>
         </div>

@@ -6,16 +6,16 @@ import './DCFCalculator.css';
 
 interface FormData {
   ticker: string;
-  discount_rate: string;
-  growth_rate: string;
-  terminal_growth_rate: string;
+  discountRate: string;
+  growthRate: string;
+  terminalGrowthRate: string;
 }
 
 interface FormErrors {
   ticker?: string;
-  discount_rate?: string;
-  growth_rate?: string;
-  terminal_growth_rate?: string;
+  discountRate?: string;
+  growthRate?: string;
+  terminalGrowthRate?: string;
   general?: string;
 }
 
@@ -23,9 +23,9 @@ const DCFCalculator: React.FC = () => {
   const navigate = useNavigate();
   const [formData, setFormData] = useState<FormData>({
     ticker: '',
-    discount_rate: '',
-    growth_rate: '',
-    terminal_growth_rate: ''
+    discountRate: '',
+    growthRate: '',
+    terminalGrowthRate: ''
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -42,40 +42,40 @@ const DCFCalculator: React.FC = () => {
     }
 
     // Discount rate validation
-    if (!formData.discount_rate.trim()) {
-      newErrors.discount_rate = 'Discount rate is required';
+    if (!formData.discountRate.trim()) {
+      newErrors.discountRate = 'Discount rate is required';
     } else {
-      const discountRate = parseFloat(formData.discount_rate);
+      const discountRate = parseFloat(formData.discountRate);
       if (isNaN(discountRate) || discountRate <= 0 || discountRate > 100) {
-        newErrors.discount_rate = 'Discount rate must be between 0.1% and 100%';
+        newErrors.discountRate = 'Discount rate must be between 0.1% and 100%';
       }
     }
 
     // Growth rate validation
-    if (!formData.growth_rate.trim()) {
-      newErrors.growth_rate = 'Growth rate is required';
+    if (!formData.growthRate.trim()) {
+      newErrors.growthRate = 'Growth rate is required';
     } else {
-      const growthRate = parseFloat(formData.growth_rate);
+      const growthRate = parseFloat(formData.growthRate);
       if (isNaN(growthRate)) {
-        newErrors.growth_rate = 'Growth rate must be a valid number';
+        newErrors.growthRate = 'Growth rate must be a valid number';
       } else if (growthRate > 1000) {
-        newErrors.growth_rate = 'Growth rate too high. Please input a realistic value.';
+        newErrors.growthRate = 'Growth rate too high. Please input a realistic value.';
       } else if (growthRate < -100) {
-        newErrors.growth_rate = 'Growth rate cannot be less than -100%';
+        newErrors.growthRate = 'Growth rate cannot be less than -100%';
       }
     }
 
     // Terminal growth rate validation
-    if (!formData.terminal_growth_rate.trim()) {
-      newErrors.terminal_growth_rate = 'Terminal growth rate is required';
+    if (!formData.terminalGrowthRate.trim()) {
+      newErrors.terminalGrowthRate = 'Terminal growth rate is required';
     } else {
-      const terminalGrowthRate = parseFloat(formData.terminal_growth_rate);
+      const terminalGrowthRate = parseFloat(formData.terminalGrowthRate);
       if (isNaN(terminalGrowthRate)) {
-        newErrors.terminal_growth_rate = 'Terminal growth rate must be a valid number';
+        newErrors.terminalGrowthRate = 'Terminal growth rate must be a valid number';
       } else if (terminalGrowthRate > 10) {
-        newErrors.terminal_growth_rate = 'Terminal growth rate should typically be below 10%';
+        newErrors.terminalGrowthRate = 'Terminal growth rate should typically be below 10%';
       } else if (terminalGrowthRate < 0) {
-        newErrors.terminal_growth_rate = 'Terminal growth rate cannot be negative';
+        newErrors.terminalGrowthRate = 'Terminal growth rate cannot be negative';
       }
     }
 
@@ -86,12 +86,12 @@ const DCFCalculator: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     let processedValue = value;
-    
+
     // Handle ticker input special formatting
     if (name === 'ticker') {
       processedValue = value.toUpperCase().slice(0, 5);
     }
-    
+
     setFormData(prev => ({
       ...prev,
       [name]: processedValue
@@ -129,7 +129,7 @@ const DCFCalculator: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -145,20 +145,19 @@ const DCFCalculator: React.FC = () => {
     try {
       const dcfInput: DCFInput = {
         ticker: formData.ticker.toUpperCase(),
-        discount_rate: parseFloat(formData.discount_rate),
-        growth_rate: parseFloat(formData.growth_rate),
-        terminal_growth_rate: parseFloat(formData.terminal_growth_rate)
+        discountRate: parseFloat(formData.discountRate),
+        growthRate: parseFloat(formData.growthRate),
+        terminalGrowthRate: parseFloat(formData.terminalGrowthRate)
       };
 
       const result = await financialService.calculateDCF(dcfInput);
-      
       // Navigate to results page with the calculation result and financial data
-      navigate('/results', { 
-        state: { 
-          dcfResult: result, 
+      navigate('/results', {
+        state: {
+          dcfResult: result,
           financialData: financialData,
           dcfInput: dcfInput
-        } 
+        }
       });
     } catch (error: any) {
       setErrors(prev => ({ ...prev, general: error.message }));
@@ -216,61 +215,61 @@ const DCFCalculator: React.FC = () => {
             <h2>DCF Parameters</h2>
             <div className="parameters-grid">
               <div className="form-group">
-                <label htmlFor="discount_rate">
+                <label htmlFor="discountRate">
                   Discount Rate (%)
                   <span className="help-text">Required rate of return</span>
                 </label>
                 <input
                   type="number"
-                  id="discount_rate"
-                  name="discount_rate"
-                  value={formData.discount_rate}
+                  id="discountRate"
+                  name="discountRate"
+                  value={formData.discountRate}
                   onChange={handleInputChange}
                   placeholder="e.g., 10"
                   step="0.1"
                   min="0.1"
                   max="100"
-                  className={errors.discount_rate ? 'error' : ''}
+                  className={errors.discountRate ? 'error' : ''}
                 />
-                {errors.discount_rate && <span className="error-message">{errors.discount_rate}</span>}
+                {errors.discountRate && <span className="error-message">{errors.discountRate}</span>}
               </div>
 
               <div className="form-group">
-                <label htmlFor="growth_rate">
+                <label htmlFor="growthRate">
                   Growth Rate (%)
                   <span className="help-text">Expected annual growth</span>
                 </label>
                 <input
                   type="number"
-                  id="growth_rate"
-                  name="growth_rate"
-                  value={formData.growth_rate}
+                  id="growthRate"
+                  name="growthRate"
+                  value={formData.growthRate}
                   onChange={handleInputChange}
                   placeholder="e.g., 15"
                   step="0.1"
-                  className={errors.growth_rate ? 'error' : ''}
+                  className={errors.growthRate ? 'error' : ''}
                 />
-                {errors.growth_rate && <span className="error-message">{errors.growth_rate}</span>}
+                {errors.growthRate && <span className="error-message">{errors.growthRate}</span>}
               </div>
 
               <div className="form-group">
-                <label htmlFor="terminal_growth_rate">
+                <label htmlFor="terminalGrowthRate">
                   Terminal Growth Rate (%)
                   <span className="help-text">Long-term growth rate</span>
                 </label>
                 <input
                   type="number"
-                  id="terminal_growth_rate"
-                  name="terminal_growth_rate"
-                  value={formData.terminal_growth_rate}
+                  id="terminalGrowthRate"
+                  name="terminalGrowthRate"
+                  value={formData.terminalGrowthRate}
                   onChange={handleInputChange}
                   placeholder="e.g., 2.5"
                   step="0.1"
                   min="0"
                   max="10"
-                  className={errors.terminal_growth_rate ? 'error' : ''}
+                  className={errors.terminalGrowthRate ? 'error' : ''}
                 />
-                {errors.terminal_growth_rate && <span className="error-message">{errors.terminal_growth_rate}</span>}
+                {errors.terminalGrowthRate && <span className="error-message">{errors.terminalGrowthRate}</span>}
               </div>
             </div>
           </div>

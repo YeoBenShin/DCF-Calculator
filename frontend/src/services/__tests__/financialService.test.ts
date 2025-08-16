@@ -108,9 +108,9 @@ describe('financialService', () => {
   describe('calculateDCF', () => {
     const mockDCFInput: DCFInput = {
       ticker: 'AAPL',
-      discount_rate: 10,
-      growth_rate: 15,
-      terminal_growth_rate: 2.5
+      discountRate: 10,
+      growthRate: 15,
+      terminalGrowthRate: 2.5
     };
 
     const mockDCFOutput: DCFOutput = {

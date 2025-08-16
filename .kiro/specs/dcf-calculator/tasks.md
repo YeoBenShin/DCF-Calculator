@@ -20,7 +20,7 @@
     - _Requirements: 2.1_
 
   - [x] 2.3 Create DCF input and output models with validation
-    - Write DCFInput class/interface with discount_rate, growth_rate, terminal_growth_rate
+    - Write DCFInput class/interface with discountRate, growthRate, terminalGrowthRate
     - Write DCFOutput class/interface with fair_value_per_share, current_price, valuation
     - Implement growth rate validation (reject >1000%)
     - Write unit tests for DCF model validation
