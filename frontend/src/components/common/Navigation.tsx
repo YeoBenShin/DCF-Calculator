@@ -32,12 +32,14 @@ const Navigation: React.FC = () => {
               <Link 
                 to="/calculator" 
                 className={`nav-link ${isActive('/calculator') ? 'active' : ''}`}
+                data-testid="nav-calculator-link"
               >
                 Calculator
               </Link>
               <Link 
                 to="/watchlist" 
                 className={`nav-link ${isActive('/watchlist') ? 'active' : ''}`}
+                data-testid="nav-watchlist-link"
               >
                 Watchlist
               </Link>
