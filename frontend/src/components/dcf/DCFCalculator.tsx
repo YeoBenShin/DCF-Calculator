@@ -188,12 +188,14 @@ const DCFCalculator: React.FC = () => {
                     onChange={handleInputChange}
                     placeholder="e.g., AAPL"
                     className={errors.ticker ? 'error' : ''}
+                    data-testid="ticker-input"
                   />
                   <button
                     type="button"
                     onClick={handleTickerSearch}
                     disabled={isLoading || !formData.ticker.trim()}
                     className="search-button"
+                    data-testid="search-button"
                   >
                     {isLoading ? 'Searching...' : 'Search'}
                   </button>
@@ -204,7 +206,7 @@ const DCFCalculator: React.FC = () => {
               {financialData && (
                 <div className="financial-data-preview">
                   <h3>✓ Financial data loaded for {financialData.ticker}</h3>
-                  <p>Data fetched on: {new Date(financialData.date_fetched).toLocaleDateString()}</p>
+                  <p>Data fetched on: {financialData.date_fetched ? new Date(financialData.date_fetched).toLocaleDateString() : 'Recently'}</p>
                 </div>
               )}
             </div>
@@ -230,6 +232,7 @@ const DCFCalculator: React.FC = () => {
                   min="0.1"
                   max="100"
                   className={errors.discountRate ? 'error' : ''}
+                  data-testid="discount-rate-input"
                 />
                 {errors.discountRate && <span className="error-message">{errors.discountRate}</span>}
               </div>
@@ -248,6 +251,7 @@ const DCFCalculator: React.FC = () => {
                   placeholder="e.g., 15"
                   step="0.1"
                   className={errors.growthRate ? 'error' : ''}
+                  data-testid="growth-rate-input"
                 />
                 {errors.growthRate && <span className="error-message">{errors.growthRate}</span>}
               </div>
@@ -268,6 +272,7 @@ const DCFCalculator: React.FC = () => {
                   min="0"
                   max="10"
                   className={errors.terminalGrowthRate ? 'error' : ''}
+                  data-testid="terminal-growth-rate-input"
                 />
                 {errors.terminalGrowthRate && <span className="error-message">{errors.terminalGrowthRate}</span>}
               </div>
@@ -286,6 +291,7 @@ const DCFCalculator: React.FC = () => {
             type="submit"
             disabled={isLoading || !financialData}
             className="calculate-button"
+            data-testid="calculate-dcf-button"
           >
             {isLoading ? 'Calculating...' : 'Calculate Fair Value'}
           </button>
