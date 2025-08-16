@@ -7,10 +7,11 @@ export const watchlistService = {
   async getWatchlist(): Promise<WatchlistItem[]> {
     try {
       const response = await retryApiCall(() => 
-        apiClient.get<ApiResponse<WatchlistItem[]>>(API_ENDPOINTS.WATCHLIST.GET)
+        apiClient.get<WatchlistItem[]>(API_ENDPOINTS.WATCHLIST.GET)
       );
       
-      return formatApiResponse<WatchlistItem[]>(response);
+      // The watchlist endpoint returns the array directly
+      return response.data;
     } catch (error: any) {
       const errorMessage = extractErrorMessage(error);
       throw new Error(errorMessage);
@@ -21,10 +22,13 @@ export const watchlistService = {
     try {
       const request: WatchlistRequest = { ticker: ticker.toUpperCase() };
       const response = await retryApiCall(() => 
-        apiClient.post<ApiResponse<void>>(API_ENDPOINTS.WATCHLIST.ADD, request)
+        apiClient.post<any>(API_ENDPOINTS.WATCHLIST.ADD, request)
       );
       
-      formatApiResponse<void>(response);
+      // The add endpoint returns a success message, no need to format
+      if (response.data.error) {
+        throw new Error(response.data.error);
+      }
     } catch (error: any) {
       const errorMessage = extractErrorMessage(error);
       throw new Error(errorMessage);
@@ -33,11 +37,15 @@ export const watchlistService = {
 
   async removeFromWatchlist(ticker: string): Promise<void> {
     try {
+      const request: WatchlistRequest = { ticker: ticker.toUpperCase() };
       const response = await retryApiCall(() => 
-        apiClient.delete<ApiResponse<void>>(`${API_ENDPOINTS.WATCHLIST.REMOVE}?ticker=${ticker.toUpperCase()}`)
+        apiClient.delete<any>(API_ENDPOINTS.WATCHLIST.REMOVE, { data: request })
       );
       
-      formatApiResponse<void>(response);
+      // The remove endpoint returns a success message, no need to format
+      if (response.data.error) {
+        throw new Error(response.data.error);
+      }
     } catch (error: any) {
       const errorMessage = extractErrorMessage(error);
       throw new Error(errorMessage);
