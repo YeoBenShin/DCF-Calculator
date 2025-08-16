@@ -42,14 +42,20 @@ export const retryApiCall = async <T>(
 
 // Utility function to extract error message from API response
 export const extractErrorMessage = (error: any): string => {
+  // Check for direct error message from backend
   if (error.response?.data?.error) {
     return error.response.data.error;
+  }
+  
+  // Check for message field from backend
+  if (error.response?.data?.message) {
+    return error.response.data.message;
   }
   
   if (error.response?.status) {
     switch (error.response.status) {
       case 400:
-        return ERROR_MESSAGES.VALIDATION_ERROR;
+        return error.response.data?.message || ERROR_MESSAGES.VALIDATION_ERROR;
       case 401:
         return ERROR_MESSAGES.UNAUTHORIZED;
       case 404:
@@ -88,17 +94,22 @@ export const isRetryableError = (error: AxiosError): boolean => {
 
 // Utility function to format API response
 export const formatApiResponse = <T>(response: AxiosResponse<any>): T => {
+  // Check for error responses first
+  if (response.data.error) {
+    throw new Error(response.data.error);
+  }
+  
+  // Handle wrapped response with success and data fields
+  if (response.data.success && response.data.data !== undefined) {
+    return response.data.data;
+  }
+  
   // Handle wrapped response with message and data fields
   if (response.data.data !== undefined) {
     return response.data.data;
   }
   
-  // Handle direct response (for backward compatibility)
-  if (response.data.success && response.data.data !== undefined) {
-    return response.data.data;
-  }
-  
-  // If no data field, return the response directly
+  // If no data field, return the response directly (most common case now)
   return response.data;
 };
 

@@ -12,6 +12,7 @@ const Watchlist: React.FC = () => {
   const [newTicker, setNewTicker] = useState<string>('');
   const [addingStock, setAddingStock] = useState<boolean>(false);
   const [removingStock, setRemovingStock] = useState<string>('');
+  const [showConfirmDialog, setShowConfirmDialog] = useState<string>('');
 
   useEffect(() => {
     loadWatchlist();
@@ -67,6 +68,7 @@ const Watchlist: React.FC = () => {
       setRemovingStock(ticker);
       setError('');
       setSuccess('');
+      setShowConfirmDialog('');
 
       await watchlistService.removeFromWatchlist(ticker);
       setSuccess(`${ticker} removed from watchlist successfully!`);
@@ -78,6 +80,14 @@ const Watchlist: React.FC = () => {
     } finally {
       setRemovingStock('');
     }
+  };
+
+  const handleConfirmRemove = (ticker: string) => {
+    setShowConfirmDialog(ticker);
+  };
+
+  const handleCancelRemove = () => {
+    setShowConfirmDialog('');
   };
 
   const formatPrice = (price: number | undefined): string => {
@@ -159,6 +169,13 @@ const Watchlist: React.FC = () => {
       {error && (
         <div className="error-message">
           {error}
+          <button 
+            onClick={loadWatchlist}
+            className="retry-button"
+            data-testid="retry-button"
+          >
+            Retry
+          </button>
         </div>
       )}
 
@@ -194,7 +211,7 @@ const Watchlist: React.FC = () => {
           </thead>
           <tbody>
             {watchlistItems.map((item) => (
-              <tr key={item.ticker}>
+              <tr key={item.ticker} data-testid={`watchlist-item-${item.ticker}`} className="watchlist-item">
                 <td className="ticker-cell">{item.ticker}</td>
                 <td className="price-cell">{formatPrice(item.fair_value_per_share)}</td>
                 <td className="price-cell">{formatPrice(item.current_price)}</td>
@@ -210,9 +227,10 @@ const Watchlist: React.FC = () => {
                 <td className="last-updated">{formatDate(item.last_updated)}</td>
                 <td>
                   <button
-                    onClick={() => handleRemoveStock(item.ticker)}
+                    onClick={() => handleConfirmRemove(item.ticker)}
                     className="remove-button"
                     disabled={removingStock === item.ticker}
+                    data-testid="remove-button"
                   >
                     {removingStock === item.ticker ? 'Removing...' : 'Remove'}
                   </button>
@@ -221,6 +239,32 @@ const Watchlist: React.FC = () => {
             ))}
           </tbody>
         </table>
+      )}
+
+      {/* Confirmation Dialog */}
+      {showConfirmDialog && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h3>Confirm Removal</h3>
+            <p>Are you sure you want to remove {showConfirmDialog} from your watchlist?</p>
+            <div className="modal-actions">
+              <button 
+                onClick={() => handleRemoveStock(showConfirmDialog)}
+                className="confirm-button"
+                data-testid="confirm-remove-button"
+              >
+                Yes, Remove
+              </button>
+              <button 
+                onClick={handleCancelRemove}
+                className="cancel-button"
+                data-testid="cancel-remove-button"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
