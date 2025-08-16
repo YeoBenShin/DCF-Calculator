@@ -15,11 +15,14 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financialData }) => {
 
   // Transform financial data into chart format
   const transformDataToChart = (data: number[], label: string): ChartDataPoint[] => {
-    if (data == undefined) {
-      return []
+    if (!data || data.length === 0) {
+      return [];
     }
+    
+    // Data is ordered from oldest to newest (4 years of data)
+    const currentYear = new Date().getFullYear();
     return data.map((value, index) => ({
-      year: `Year ${index + 1}`,
+      year: `${currentYear - (data.length - 1) + index}`, // Show actual years
       value: value
     }));
   };
@@ -99,7 +102,7 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financialData }) => {
     <div className="financial-charts">
       <div className="charts-header">
         <h2>Financial Performance</h2>
-        <p className="data-source">Data for {financialData.ticker} • Last updated: {new Date(financialData.date_fetched).toLocaleDateString()}</p>
+        <p className="data-source">Data for {financialData.ticker} • Last updated: {financialData.date_fetched ? new Date(financialData.date_fetched).toLocaleDateString() : 'Recently'}</p>
       </div>
 
       {/* Chart Navigation */}
@@ -142,7 +145,7 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financialData }) => {
             <p>No data available for {getChartTitle(activeChart)}</p>
           </div>
         ) : (
-          <div className="chart-wrapper">
+          <div className="chart-wrapper" data-testid={`${activeChart.replace('_', '-')}-chart`}>
             <h3 className="chart-title">{getChartTitle(activeChart)}</h3>
             <ResponsiveContainer width="100%" height={400}>
               <LineChart
