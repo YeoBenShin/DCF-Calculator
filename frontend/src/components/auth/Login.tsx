@@ -100,6 +100,7 @@ const Login: React.FC = () => {
               onChange={handleInputChange}
               className={errors.email ? 'error' : ''}
               placeholder="Enter your email"
+              data-testid="email-input"
             />
             {errors.email && <span className="error-message">{errors.email}</span>}
           </div>
@@ -114,6 +115,7 @@ const Login: React.FC = () => {
               onChange={handleInputChange}
               className={errors.password ? 'error' : ''}
               placeholder="Enter your password"
+              data-testid="password-input"
             />
             {errors.password && <span className="error-message">{errors.password}</span>}
           </div>
@@ -123,6 +125,7 @@ const Login: React.FC = () => {
           <button 
             type="submit" 
             className="auth-button"
+            data-testid="login-button"
           >
             Login
           </button>
