@@ -1,21 +1,42 @@
 package com.dcf.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class FinancialDataDto {
     private String ticker;
     private List<Double> revenue;
+    
+    @JsonProperty("operating_expense")
     private List<Double> operatingExpense;
+    
+    @JsonProperty("operating_income")
     private List<Double> operatingIncome;
+    
+    @JsonProperty("operating_cash_flow")
     private List<Double> operatingCashFlow;
+    
+    @JsonProperty("net_profit")
     private List<Double> netProfit;
+    
+    @JsonProperty("capital_expenditure")
     private List<Double> capitalExpenditure;
+    
+    @JsonProperty("free_cash_flow")
     private List<Double> freeCashFlow;
+    
     private List<Double> eps;
+    
+    @JsonProperty("total_debt")
     private List<Double> totalDebt;
+    
+    @JsonProperty("ordinary_shares_number")
     private List<Double> ordinarySharesNumber;
-    private LocalDate dateFetched;
+    
+    @JsonProperty("date_fetched")
+    private String dateFetched;
 
     public FinancialDataDto() {}
 
@@ -108,11 +129,15 @@ public class FinancialDataDto {
         this.ordinarySharesNumber = ordinarySharesNumber;
     }
 
-    public LocalDate getDateFetched() {
+    public String getDateFetched() {
         return dateFetched;
     }
 
-    public void setDateFetched(LocalDate dateFetched) {
+    public void setDateFetched(String dateFetched) {
         this.dateFetched = dateFetched;
+    }
+    
+    public void setDateFetched(LocalDate dateFetched) {
+        this.dateFetched = dateFetched != null ? dateFetched.format(DateTimeFormatter.ISO_LOCAL_DATE) : null;
     }
 }
