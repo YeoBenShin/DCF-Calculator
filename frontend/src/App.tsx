@@ -44,8 +44,13 @@ const AppContent: React.FC = () => {
         const token = authService.getToken();
         const user = authService.getCurrentUser();
         
-        if (token && user) {
+        // Validate that we have both token and a proper user object
+        if (token && user && typeof user === 'object' && user.email) {
           setUser(user);
+        } else if (token || user) {
+          // If we have partial data, clear it to avoid inconsistent state
+          console.warn('Inconsistent auth state detected, clearing...');
+          authService.logout();
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
