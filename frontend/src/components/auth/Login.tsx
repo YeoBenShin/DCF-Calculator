@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { AuthRequest, AuthResponse } from '../../types';
 import { authService } from '../../services/authService';
@@ -15,10 +15,17 @@ const Login: React.FC = () => {
   
   const navigate = useNavigate();
   const location = useLocation();
-  const { setUser, setLoading } = useApp();
+  const { state, setUser, setLoading } = useApp();
   
   // Get the intended destination from location state
   const from = location.state?.from?.pathname || '/calculator';
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (state.isAuthenticated) {
+      navigate(from, { replace: true });
+    }
+  }, [state.isAuthenticated, navigate, from]);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<AuthRequest> = {};
@@ -72,7 +79,7 @@ const Login: React.FC = () => {
       const response: AuthResponse = await authService.login(formData);
       // Store token in localStorage
       localStorage.setItem('authToken', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user.userId));
+      localStorage.setItem('user', JSON.stringify(response.user));
       // Update global state
       setUser(response.user);
       
