@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthRequest, AuthResponse } from '../../types';
 import { authService } from '../../services/authService';
@@ -19,7 +19,14 @@ const Signup: React.FC = () => {
   const [apiError, setApiError] = useState<string>('');
   
   const navigate = useNavigate();
-  const { setUser, setLoading } = useApp();
+  const { state, setUser, setLoading } = useApp();
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (state.isAuthenticated) {
+      navigate('/calculator', { replace: true });
+    }
+  }, [state.isAuthenticated, navigate]);
 
   const validateForm = (): boolean => {
     const newErrors: Partial<SignupFormData> = {};
