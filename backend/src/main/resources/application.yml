@@ -23,7 +23,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      ddl-auto:  create-drop # update (in production)
     show-sql: true
     properties:
       hibernate:
@@ -60,7 +60,7 @@ firebase:
 scraping:
   timeout-seconds: 30
   cache-days: 7
-  enable-real-scraping: false # Set to true in production with proper rate limiting
+  enable-real-scraping: true # Set to true in production with proper rate limiting
   max-retries: 3
   retry-delay-ms: 1000
   request-delay-ms: 2000
