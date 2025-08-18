@@ -8,10 +8,6 @@ interface FairValueCardProps {
 }
 
 const FairValueCard: React.FC<FairValueCardProps> = ({ dcfResult, dcfInput }) => {
-  // Debug logging to see what we're actually receiving
-  console.log('DCF Result received:', dcfResult);
-  console.log('Fair Value Per Share:', dcfResult.fairValuePerShare, typeof dcfResult.fairValuePerShare);
-  console.log('Current Price:', dcfResult.currentPrice, typeof dcfResult.currentPrice);
 
   const getValuationColor = (valuation: string): string => {
     switch (valuation) {
@@ -39,7 +35,7 @@ const FairValueCard: React.FC<FairValueCardProps> = ({ dcfResult, dcfInput }) =>
     }
   };
 
-  // Safely convert values to numbers
+  // Safely convert BigDecimal string values to numbers
   const fairValue = typeof dcfResult.fairValuePerShare === 'number'
     ? dcfResult.fairValuePerShare
     : parseFloat(dcfResult.fairValuePerShare as any) || 0;
@@ -47,6 +43,25 @@ const FairValueCard: React.FC<FairValueCardProps> = ({ dcfResult, dcfInput }) =>
   const currentPrice = typeof dcfResult.currentPrice === 'number'
     ? dcfResult.currentPrice
     : parseFloat(dcfResult.currentPrice as any) || 0;
+
+  // Enhanced formatting for BigDecimal values
+  const formatPrice = (value: number): string => {
+    if (Math.abs(value) < 1e-6) {
+      return '$0.00';
+    } else if (Math.abs(value) < 0.01) {
+      return `$${value.toFixed(6)}`; // Very small values
+    } else if (Math.abs(value) < 1) {
+      return `$${value.toFixed(4)}`; // Small values
+    } else if (Math.abs(value) < 1000) {
+      return `$${value.toFixed(2)}`; // Normal values
+    } else if (Math.abs(value) >= 1e6) {
+      return `$${(value / 1e6).toFixed(2)}M`; // Millions
+    } else if (Math.abs(value) >= 1e3) {
+      return `$${(value / 1e3).toFixed(2)}K`; // Thousands
+    } else {
+      return `$${value.toFixed(2)}`;
+    }
+  };
 
   const calculateUpside = (): number => {
     if (currentPrice === 0) return 0;
@@ -70,7 +85,7 @@ const FairValueCard: React.FC<FairValueCardProps> = ({ dcfResult, dcfInput }) =>
           <div className="price-item">
             <label>Fair Value</label>
             <div className="price-value primary">
-              ${fairValue.toFixed(2)}
+              {formatPrice(fairValue)}
             </div>
           </div>
 
@@ -79,7 +94,7 @@ const FairValueCard: React.FC<FairValueCardProps> = ({ dcfResult, dcfInput }) =>
           <div className="price-item">
             <label>Current Price</label>
             <div className="price-value secondary">
-              ${currentPrice.toFixed(2)}
+              {formatPrice(currentPrice)}
             </div>
           </div>
         </div>
@@ -96,15 +111,15 @@ const FairValueCard: React.FC<FairValueCardProps> = ({ dcfResult, dcfInput }) =>
           <div className="parameters-grid">
             <div className="parameter-item">
               <label>Discount Rate</label>
-              <span>{dcfInput.discountRate}%</span>
+              <span>{(parseFloat(dcfInput.discountRate) || 0).toFixed(2)}%</span>
             </div>
             <div className="parameter-item">
               <label>Growth Rate</label>
-              <span>{dcfInput.growthRate}%</span>
+              <span>{(parseFloat(dcfInput.growthRate) || 0).toFixed(2)}%</span>
             </div>
             <div className="parameter-item">
               <label>Terminal Growth Rate</label>
-              <span>{dcfInput.terminalGrowthRate}%</span>
+              <span>{(parseFloat(dcfInput.terminalGrowthRate) || 0).toFixed(2)}%</span>
             </div>
           </div>
         </div>

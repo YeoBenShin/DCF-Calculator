@@ -13,18 +13,34 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financialData }) => {
   const [activeChart, setActiveChart] = useState<ChartType>('revenue');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Transform financial data into chart format
-  const transformDataToChart = (data: number[], label: string): ChartDataPoint[] => {
+  // Transform financial data into chart format - handle BigDecimal strings
+  const transformDataToChart = (data: string[], label: string): ChartDataPoint[] => {
     if (!data || data.length === 0) {
       return [];
     }
     
     // Data is ordered from oldest to newest (4 years of data)
     const currentYear = new Date().getFullYear();
-    return data.map((value, index) => ({
-      year: `${currentYear - (data.length - 1) + index}`, // Show actual years
-      value: value
-    }));
+    return data.map((value, index) => {
+      // Convert BigDecimal string to number for chart display
+      // Handle very large BigDecimal values that might be in scientific notation
+      let numericValue = 0;
+      try {
+        numericValue = parseFloat(value) || 0;
+        // Handle potential scientific notation from BigDecimal
+        if (isNaN(numericValue)) {
+          numericValue = 0;
+        }
+      } catch (error) {
+        console.warn(`Failed to parse BigDecimal value: ${value}`, error);
+        numericValue = 0;
+      }
+      
+      return {
+        year: `${currentYear - (data.length - 1) + index}`, // Show actual years
+        value: numericValue
+      };
+    });
   };
 
   const getChartData = (type: ChartType): ChartDataPoint[] => {
@@ -72,20 +88,52 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financialData }) => {
     }
   };
 
+  // Enhanced formatting for BigDecimal values including very large and small numbers
   const formatValue = (value: number, type: ChartType): string => {
-    if (type === 'eps') {
-      return `$${value.toFixed(2)}`;
+    // Handle very small values (near zero) - important for BigDecimal precision
+    if (Math.abs(value) < 1e-10) {
+      return '0';
     }
     
-    // Format large numbers (in billions/millions)
-    if (Math.abs(value) >= 1e9) {
-      return `$${(value / 1e9).toFixed(1)}B`;
-    } else if (Math.abs(value) >= 1e6) {
-      return `$${(value / 1e6).toFixed(1)}M`;
-    } else if (Math.abs(value) >= 1e3) {
-      return `$${(value / 1e3).toFixed(1)}K`;
+    if (type === 'eps') {
+      // For EPS, show appropriate precision based on value size
+      if (Math.abs(value) < 0.01) {
+        return `$${value.toFixed(6)}`; // Very small EPS values
+      } else if (Math.abs(value) < 1) {
+        return `$${value.toFixed(4)}`; // Small EPS values
+      } else if (Math.abs(value) < 100) {
+        return `$${value.toFixed(2)}`; // Normal EPS values
+      } else {
+        return `$${value.toFixed(1)}`; // Large EPS values
+      }
     }
-    return `$${value.toFixed(0)}`;
+    
+    // Format very large numbers (handle BigDecimal precision)
+    if (Math.abs(value) >= 1e15) {
+      return `$${(value / 1e15).toFixed(3)}Q`; // Quadrillions
+    } else if (Math.abs(value) >= 1e12) {
+      return `$${(value / 1e12).toFixed(2)}T`; // Trillions
+    } else if (Math.abs(value) >= 1e9) {
+      return `$${(value / 1e9).toFixed(2)}B`; // Billions
+    } else if (Math.abs(value) >= 1e6) {
+      return `$${(value / 1e6).toFixed(2)}M`; // Millions
+    } else if (Math.abs(value) >= 1e3) {
+      return `$${(value / 1e3).toFixed(2)}K`; // Thousands
+    } else if (Math.abs(value) >= 1) {
+      return `$${value.toFixed(2)}`; // Regular values
+    } else if (Math.abs(value) >= 0.01) {
+      return `$${value.toFixed(4)}`; // Small values
+    } else {
+      return `$${value.toFixed(8)}`; // Very small values (preserve BigDecimal precision)
+    }
+  };
+
+  // Enhanced tooltip formatter for BigDecimal values
+  const formatTooltipValue = (value: number, type: ChartType): string => {
+    if (type === 'eps') {
+      return `${formatValue(value, type)} per share`;
+    }
+    return formatValue(value, type);
   };
 
   const handleChartChange = (type: ChartType) => {
@@ -167,14 +215,16 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financialData }) => {
                   stroke="#666"
                   fontSize={12}
                   tickFormatter={(value) => formatValue(value, activeChart)}
+                  domain={['dataMin', 'dataMax']} // Auto-scale for BigDecimal ranges
                 />
                 <Tooltip
-                  formatter={(value: number) => [formatValue(value, activeChart), getChartTitle(activeChart)]}
+                  formatter={(value: number) => [formatTooltipValue(value, activeChart), getChartTitle(activeChart)]}
                   labelStyle={{ color: '#333' }}
                   contentStyle={{
                     backgroundColor: '#fff',
                     border: '1px solid #ccc',
-                    borderRadius: '4px'
+                    borderRadius: '4px',
+                    fontSize: '14px'
                   }}
                 />
                 <Legend />
@@ -205,6 +255,12 @@ const FinancialCharts: React.FC<FinancialChartsProps> = ({ financialData }) => {
               <label>Trend</label>
               <span className={chartData.length > 1 && chartData[chartData.length - 1].value > chartData[0].value ? 'positive' : 'negative'}>
                 {chartData.length > 1 && chartData[chartData.length - 1].value > chartData[0].value ? '↗ Growing' : '↘ Declining'}
+              </span>
+            </div>
+            <div className="stat-item">
+              <label>Range</label>
+              <span>
+                {formatValue(Math.min(...chartData.map(d => d.value)), activeChart)} - {formatValue(Math.max(...chartData.map(d => d.value)), activeChart)}
               </span>
             </div>
           </div>

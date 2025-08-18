@@ -3,7 +3,9 @@ package com.dcf.entity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.DecimalMin;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,21 +19,21 @@ public class DCFOutput {
     @NotBlank(message = "Ticker symbol is required")
     private String ticker;
 
-    @Column(name = "fair_value_per_share", nullable = false)
+    @Column(name = "fair_value_per_share", nullable = false, precision = 20, scale = 6)
     @NotNull(message = "Fair value per share is required")
-    @Positive(message = "Fair value per share must be positive")
-    private Double fairValuePerShare;
+    @DecimalMin(value = "0.0", message = "Fair value per share must be positive")
+    private BigDecimal fairValuePerShare;
 
-    @Column(name = "current_price")
-    @Positive(message = "Current price must be positive")
-    private Double currentPrice;
+    @Column(name = "current_price", precision = 20, scale = 6)
+    @DecimalMin(value = "0.0", message = "Current price must be positive")
+    private BigDecimal currentPrice;
 
     @Column(nullable = false)
     @NotBlank(message = "Valuation status is required")
     private String valuation;
 
-    @Column(name = "upside_downside_percentage")
-    private Double upsideDownsidePercentage;
+    @Column(name = "upside_downside_percentage", precision = 10, scale = 6)
+    private BigDecimal upsideDownsidePercentage;
 
     @Column(name = "dcf_input_id")
     private String dcfInputId;
@@ -43,26 +45,26 @@ public class DCFOutput {
     private LocalDateTime calculatedAt;
 
     // Additional DCF calculation details
-    @Column(name = "terminal_value")
-    private Double terminalValue;
+    @Column(name = "terminal_value", precision = 25, scale = 2)
+    private BigDecimal terminalValue;
 
-    @Column(name = "present_value_of_cash_flows")
-    private Double presentValueOfCashFlows;
+    @Column(name = "present_value_of_cash_flows", precision = 25, scale = 2)
+    private BigDecimal presentValueOfCashFlows;
 
-    @Column(name = "enterprise_value")
-    private Double enterpriseValue;
+    @Column(name = "enterprise_value", precision = 25, scale = 2)
+    private BigDecimal enterpriseValue;
 
-    @Column(name = "equity_value")
-    private Double equityValue;
+    @Column(name = "equity_value", precision = 25, scale = 2)
+    private BigDecimal equityValue;
 
-    @Column(name = "shares_outstanding")
-    private Double sharesOutstanding;
+    @Column(name = "shares_outstanding", precision = 20, scale = 0)
+    private BigDecimal sharesOutstanding;
 
     public DCFOutput() {
         this.calculatedAt = LocalDateTime.now();
     }
 
-    public DCFOutput(String ticker, Double fairValuePerShare, Double currentPrice, String valuation) {
+    public DCFOutput(String ticker, BigDecimal fairValuePerShare, BigDecimal currentPrice, String valuation) {
         this();
         this.ticker = ticker != null ? ticker.toUpperCase() : null;
         this.fairValuePerShare = fairValuePerShare;
@@ -88,20 +90,20 @@ public class DCFOutput {
         this.ticker = ticker != null ? ticker.toUpperCase() : null;
     }
 
-    public Double getFairValuePerShare() {
+    public BigDecimal getFairValuePerShare() {
         return fairValuePerShare;
     }
 
-    public void setFairValuePerShare(Double fairValuePerShare) {
+    public void setFairValuePerShare(BigDecimal fairValuePerShare) {
         this.fairValuePerShare = fairValuePerShare;
         this.calculateUpsideDownside();
     }
 
-    public Double getCurrentPrice() {
+    public BigDecimal getCurrentPrice() {
         return currentPrice;
     }
 
-    public void setCurrentPrice(Double currentPrice) {
+    public void setCurrentPrice(BigDecimal currentPrice) {
         this.currentPrice = currentPrice;
         this.calculateUpsideDownside();
     }
@@ -114,11 +116,11 @@ public class DCFOutput {
         this.valuation = valuation;
     }
 
-    public Double getUpsideDownsidePercentage() {
+    public BigDecimal getUpsideDownsidePercentage() {
         return upsideDownsidePercentage;
     }
 
-    public void setUpsideDownsidePercentage(Double upsideDownsidePercentage) {
+    public void setUpsideDownsidePercentage(BigDecimal upsideDownsidePercentage) {
         this.upsideDownsidePercentage = upsideDownsidePercentage;
     }
 
@@ -146,68 +148,70 @@ public class DCFOutput {
         this.calculatedAt = calculatedAt;
     }
 
-    public Double getTerminalValue() {
+    public BigDecimal getTerminalValue() {
         return terminalValue;
     }
 
-    public void setTerminalValue(Double terminalValue) {
+    public void setTerminalValue(BigDecimal terminalValue) {
         this.terminalValue = terminalValue;
     }
 
-    public Double getPresentValueOfCashFlows() {
+    public BigDecimal getPresentValueOfCashFlows() {
         return presentValueOfCashFlows;
     }
 
-    public void setPresentValueOfCashFlows(Double presentValueOfCashFlows) {
+    public void setPresentValueOfCashFlows(BigDecimal presentValueOfCashFlows) {
         this.presentValueOfCashFlows = presentValueOfCashFlows;
     }
 
-    public Double getEnterpriseValue() {
+    public BigDecimal getEnterpriseValue() {
         return enterpriseValue;
     }
 
-    public void setEnterpriseValue(Double enterpriseValue) {
+    public void setEnterpriseValue(BigDecimal enterpriseValue) {
         this.enterpriseValue = enterpriseValue;
     }
 
-    public Double getEquityValue() {
+    public BigDecimal getEquityValue() {
         return equityValue;
     }
 
-    public void setEquityValue(Double equityValue) {
+    public void setEquityValue(BigDecimal equityValue) {
         this.equityValue = equityValue;
     }
 
-    public Double getSharesOutstanding() {
+    public BigDecimal getSharesOutstanding() {
         return sharesOutstanding;
     }
 
-    public void setSharesOutstanding(Double sharesOutstanding) {
+    public void setSharesOutstanding(BigDecimal sharesOutstanding) {
         this.sharesOutstanding = sharesOutstanding;
     }
 
     // Utility methods
     private void calculateUpsideDownside() {
-        if (fairValuePerShare != null && currentPrice != null && currentPrice > 0) {
-            this.upsideDownsidePercentage = ((fairValuePerShare - currentPrice) / currentPrice) * 100;
+        if (fairValuePerShare != null && currentPrice != null && currentPrice.compareTo(BigDecimal.ZERO) > 0) {
+            BigDecimal difference = fairValuePerShare.subtract(currentPrice);
+            this.upsideDownsidePercentage = difference.divide(currentPrice, 6, RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal("100"));
         }
     }
 
     public boolean isUndervalued() {
-        return fairValuePerShare != null && currentPrice != null && fairValuePerShare > currentPrice;
+        return fairValuePerShare != null && currentPrice != null && fairValuePerShare.compareTo(currentPrice) > 0;
     }
 
     public boolean isOvervalued() {
-        return fairValuePerShare != null && currentPrice != null && fairValuePerShare < currentPrice;
+        return fairValuePerShare != null && currentPrice != null && fairValuePerShare.compareTo(currentPrice) < 0;
     }
 
-    public boolean isFairlyValued(double tolerancePercentage) {
+    public boolean isFairlyValued(BigDecimal tolerancePercentage) {
         if (fairValuePerShare == null || currentPrice == null) {
             return false;
         }
-        double difference = Math.abs(fairValuePerShare - currentPrice);
-        double tolerance = currentPrice * (tolerancePercentage / 100.0);
-        return difference <= tolerance;
+        BigDecimal difference = fairValuePerShare.subtract(currentPrice).abs();
+        BigDecimal tolerance = currentPrice.multiply(tolerancePercentage.divide(new BigDecimal("100"), 6, RoundingMode.HALF_UP));
+        return difference.compareTo(tolerance) <= 0;
     }
 
     public String getValuationStatus() {
@@ -215,7 +219,7 @@ public class DCFOutput {
             return "Unknown";
         }
         
-        if (isFairlyValued(5.0)) { // 5% tolerance
+        if (isFairlyValued(new BigDecimal("5.0"))) { // 5% tolerance
             return "Fair Value";
         } else if (isUndervalued()) {
             return "Undervalued";
@@ -224,12 +228,12 @@ public class DCFOutput {
         }
     }
 
-    public Double getAbsoluteUpside() {
+    public BigDecimal getAbsoluteUpside() {
         return fairValuePerShare != null && currentPrice != null ? 
-               fairValuePerShare - currentPrice : null;
+               fairValuePerShare.subtract(currentPrice) : null;
     }
 
-    public boolean hasSignificantUpside(double thresholdPercentage) {
-        return upsideDownsidePercentage != null && upsideDownsidePercentage > thresholdPercentage;
+    public boolean hasSignificantUpside(BigDecimal thresholdPercentage) {
+        return upsideDownsidePercentage != null && upsideDownsidePercentage.compareTo(thresholdPercentage) > 0;
     }
 }

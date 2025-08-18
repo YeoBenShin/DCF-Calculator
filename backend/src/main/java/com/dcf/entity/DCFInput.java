@@ -2,6 +2,8 @@ package com.dcf.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 @Entity
@@ -16,23 +18,23 @@ public class DCFInput {
     @Size(min = 1, max = 10, message = "Ticker symbol must be between 1 and 10 characters")
     private String ticker;
 
-    @Column(name = "discountRate", nullable = false)
+    @Column(name = "discountRate", nullable = false, precision = 10, scale = 6)
     @NotNull(message = "Discount rate is required")
     @DecimalMin(value = "0.0", message = "Discount rate must be positive")
     @DecimalMax(value = "100.0", message = "Discount rate must be less than 100%")
-    private Double discountRate;
+    private BigDecimal discountRate;
 
-    @Column(name = "growthRate", nullable = false)
+    @Column(name = "growthRate", nullable = false, precision = 10, scale = 6)
     @NotNull(message = "Growth rate is required")
     @DecimalMin(value = "-100.0", message = "Growth rate must be greater than -100%")
     @DecimalMax(value = "1000.0", message = "Growth rate must be less than 1000%")
-    private Double growthRate;
+    private BigDecimal growthRate;
 
-    @Column(name = "terminalGrowthRate", nullable = false)
+    @Column(name = "terminalGrowthRate", nullable = false, precision = 10, scale = 6)
     @NotNull(message = "Terminal growth rate is required")
     @DecimalMin(value = "0.0", message = "Terminal growth rate must be positive")
     @DecimalMax(value = "10.0", message = "Terminal growth rate must be less than 10%")
-    private Double terminalGrowthRate;
+    private BigDecimal terminalGrowthRate;
 
     @Column(name = "projection_years")
     @Min(value = 1, message = "Projection years must be at least 1")
@@ -49,7 +51,7 @@ public class DCFInput {
         this.createdAt = LocalDateTime.now();
     }
 
-    public DCFInput(String ticker, Double discountRate, Double growthRate, Double terminalGrowthRate) {
+    public DCFInput(String ticker, BigDecimal discountRate, BigDecimal growthRate, BigDecimal terminalGrowthRate) {
         this();
         this.ticker = ticker != null ? ticker.toUpperCase() : null;
         this.discountRate = discountRate;
@@ -74,27 +76,27 @@ public class DCFInput {
         this.ticker = ticker != null ? ticker.toUpperCase() : null;
     }
 
-    public Double getDiscountRate() {
+    public BigDecimal getDiscountRate() {
         return discountRate;
     }
 
-    public void setDiscountRate(Double discountRate) {
+    public void setDiscountRate(BigDecimal discountRate) {
         this.discountRate = discountRate;
     }
 
-    public Double getGrowthRate() {
+    public BigDecimal getGrowthRate() {
         return growthRate;
     }
 
-    public void setGrowthRate(Double growthRate) {
+    public void setGrowthRate(BigDecimal growthRate) {
         this.growthRate = growthRate;
     }
 
-    public Double getTerminalGrowthRate() {
+    public BigDecimal getTerminalGrowthRate() {
         return terminalGrowthRate;
     }
 
-    public void setTerminalGrowthRate(Double terminalGrowthRate) {
+    public void setTerminalGrowthRate(BigDecimal terminalGrowthRate) {
         this.terminalGrowthRate = terminalGrowthRate;
     }
 
@@ -124,22 +126,22 @@ public class DCFInput {
 
     // Utility methods
     public boolean isReasonableGrowthRate() {
-        return growthRate != null && growthRate <= 100.0; // 100% growth is already quite high
+        return growthRate != null && growthRate.compareTo(new BigDecimal("100.0")) <= 0; // 100% growth is already quite high
     }
 
     public boolean isConservativeTerminalGrowthRate() {
-        return terminalGrowthRate != null && terminalGrowthRate <= 3.0; // 3% is conservative
+        return terminalGrowthRate != null && terminalGrowthRate.compareTo(new BigDecimal("3.0")) <= 0; // 3% is conservative
     }
 
-    public Double getDiscountRateAsDecimal() {
-        return discountRate != null ? discountRate / 100.0 : null;
+    public BigDecimal getDiscountRateAsDecimal() {
+        return discountRate != null ? discountRate.divide(new BigDecimal("100.0"), 10, RoundingMode.HALF_UP) : null;
     }
 
-    public Double getGrowthRateAsDecimal() {
-        return growthRate != null ? growthRate / 100.0 : null;
+    public BigDecimal getGrowthRateAsDecimal() {
+        return growthRate != null ? growthRate.divide(new BigDecimal("100.0"), 10, RoundingMode.HALF_UP) : null;
     }
 
-    public Double getTerminalGrowthRateAsDecimal() {
-        return terminalGrowthRate != null ? terminalGrowthRate / 100.0 : null;
+    public BigDecimal getTerminalGrowthRateAsDecimal() {
+        return terminalGrowthRate != null ? terminalGrowthRate.divide(new BigDecimal("100.0"), 10, RoundingMode.HALF_UP) : null;
     }
 }

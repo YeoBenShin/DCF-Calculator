@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,61 +26,61 @@ public class FinancialData {
     @CollectionTable(name = "financial_revenue", joinColumns = @JoinColumn(name = "financial_data_id"))
     @Column(name = "value")
     @OrderColumn(name = "year_index")
-    private List<Double> revenue = new ArrayList<>();
+    private List<BigDecimal> revenue = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "financial_operating_expense", joinColumns = @JoinColumn(name = "financial_data_id"))
     @Column(name = "value")
     @OrderColumn(name = "year_index")
-    private List<Double> operatingExpense = new ArrayList<>();
+    private List<BigDecimal> operatingExpense = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "financial_operating_income", joinColumns = @JoinColumn(name = "financial_data_id"))
     @Column(name = "value")
     @OrderColumn(name = "year_index")
-    private List<Double> operatingIncome = new ArrayList<>();
+    private List<BigDecimal> operatingIncome = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "financial_operating_cash_flow", joinColumns = @JoinColumn(name = "financial_data_id"))
     @Column(name = "value")
     @OrderColumn(name = "year_index")
-    private List<Double> operatingCashFlow = new ArrayList<>();
+    private List<BigDecimal> operatingCashFlow = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "financial_net_profit", joinColumns = @JoinColumn(name = "financial_data_id"))
     @Column(name = "value")
     @OrderColumn(name = "year_index")
-    private List<Double> netProfit = new ArrayList<>();
+    private List<BigDecimal> netProfit = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "financial_capital_expenditure", joinColumns = @JoinColumn(name = "financial_data_id"))
     @Column(name = "value")
     @OrderColumn(name = "year_index")
-    private List<Double> capitalExpenditure = new ArrayList<>();
+    private List<BigDecimal> capitalExpenditure = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "financial_free_cash_flow", joinColumns = @JoinColumn(name = "financial_data_id"))
     @Column(name = "value")
     @OrderColumn(name = "year_index")
-    private List<Double> freeCashFlow = new ArrayList<>();
+    private List<BigDecimal> freeCashFlow = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "financial_eps", joinColumns = @JoinColumn(name = "financial_data_id"))
     @Column(name = "value")
     @OrderColumn(name = "year_index")
-    private List<Double> eps = new ArrayList<>();
+    private List<BigDecimal> eps = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "financial_total_debt", joinColumns = @JoinColumn(name = "financial_data_id"))
     @Column(name = "value")
     @OrderColumn(name = "year_index")
-    private List<Double> totalDebt = new ArrayList<>();
+    private List<BigDecimal> totalDebt = new ArrayList<>();
 
     @ElementCollection
     @CollectionTable(name = "financial_ordinary_shares", joinColumns = @JoinColumn(name = "financial_data_id"))
     @Column(name = "value")
     @OrderColumn(name = "year_index")
-    private List<Double> ordinarySharesNumber = new ArrayList<>();
+    private List<BigDecimal> ordinarySharesNumber = new ArrayList<>();
 
     @Column(name = "date_fetched", nullable = false)
     @NotNull(message = "Date fetched is required")
@@ -123,83 +125,83 @@ public class FinancialData {
         this.ticker = ticker != null ? ticker.toUpperCase() : null;
     }
 
-    public List<Double> getRevenue() {
+    public List<BigDecimal> getRevenue() {
         return revenue;
     }
 
-    public void setRevenue(List<Double> revenue) {
+    public void setRevenue(List<BigDecimal> revenue) {
         this.revenue = revenue != null ? revenue : new ArrayList<>();
     }
 
-    public List<Double> getOperatingExpense() {
+    public List<BigDecimal> getOperatingExpense() {
         return operatingExpense;
     }
 
-    public void setOperatingExpense(List<Double> operatingExpense) {
+    public void setOperatingExpense(List<BigDecimal> operatingExpense) {
         this.operatingExpense = operatingExpense != null ? operatingExpense : new ArrayList<>();
     }
 
-    public List<Double> getOperatingIncome() {
+    public List<BigDecimal> getOperatingIncome() {
         return operatingIncome;
     }
 
-    public void setOperatingIncome(List<Double> operatingIncome) {
+    public void setOperatingIncome(List<BigDecimal> operatingIncome) {
         this.operatingIncome = operatingIncome != null ? operatingIncome : new ArrayList<>();
     }
 
-    public List<Double> getOperatingCashFlow() {
+    public List<BigDecimal> getOperatingCashFlow() {
         return operatingCashFlow;
     }
 
-    public void setOperatingCashFlow(List<Double> operatingCashFlow) {
+    public void setOperatingCashFlow(List<BigDecimal> operatingCashFlow) {
         this.operatingCashFlow = operatingCashFlow != null ? operatingCashFlow : new ArrayList<>();
     }
 
-    public List<Double> getNetProfit() {
+    public List<BigDecimal> getNetProfit() {
         return netProfit;
     }
 
-    public void setNetProfit(List<Double> netProfit) {
+    public void setNetProfit(List<BigDecimal> netProfit) {
         this.netProfit = netProfit != null ? netProfit : new ArrayList<>();
     }
 
-    public List<Double> getCapitalExpenditure() {
+    public List<BigDecimal> getCapitalExpenditure() {
         return capitalExpenditure;
     }
 
-    public void setCapitalExpenditure(List<Double> capitalExpenditure) {
+    public void setCapitalExpenditure(List<BigDecimal> capitalExpenditure) {
         this.capitalExpenditure = capitalExpenditure != null ? capitalExpenditure : new ArrayList<>();
     }
 
-    public List<Double> getFreeCashFlow() {
+    public List<BigDecimal> getFreeCashFlow() {
         return freeCashFlow;
     }
 
-    public void setFreeCashFlow(List<Double> freeCashFlow) {
+    public void setFreeCashFlow(List<BigDecimal> freeCashFlow) {
         this.freeCashFlow = freeCashFlow != null ? freeCashFlow : new ArrayList<>();
     }
 
-    public List<Double> getEps() {
+    public List<BigDecimal> getEps() {
         return eps;
     }
 
-    public void setEps(List<Double> eps) {
+    public void setEps(List<BigDecimal> eps) {
         this.eps = eps != null ? eps : new ArrayList<>();
     }
 
-    public List<Double> getTotalDebt() {
+    public List<BigDecimal> getTotalDebt() {
         return totalDebt;
     }
 
-    public void setTotalDebt(List<Double> totalDebt) {
+    public void setTotalDebt(List<BigDecimal> totalDebt) {
         this.totalDebt = totalDebt != null ? totalDebt : new ArrayList<>();
     }
 
-    public List<Double> getOrdinarySharesNumber() {
+    public List<BigDecimal> getOrdinarySharesNumber() {
         return ordinarySharesNumber;
     }
 
-    public void setOrdinarySharesNumber(List<Double> ordinarySharesNumber) {
+    public void setOrdinarySharesNumber(List<BigDecimal> ordinarySharesNumber) {
         this.ordinarySharesNumber = ordinarySharesNumber != null ? ordinarySharesNumber : new ArrayList<>();
     }
 
@@ -236,15 +238,15 @@ public class FinancialData {
         return dateFetched.isBefore(LocalDate.now().minusDays(daysThreshold));
     }
 
-    public Double getLatestRevenue() {
+    public BigDecimal getLatestRevenue() {
         return revenue.isEmpty() ? null : revenue.get(revenue.size() - 1);
     }
 
-    public Double getLatestFreeCashFlow() {
+    public BigDecimal getLatestFreeCashFlow() {
         return freeCashFlow.isEmpty() ? null : freeCashFlow.get(freeCashFlow.size() - 1);
     }
 
-    public Double getLatestEps() {
+    public BigDecimal getLatestEps() {
         return eps.isEmpty() ? null : eps.get(eps.size() - 1);
     }
 
@@ -252,11 +254,11 @@ public class FinancialData {
         return Math.max(Math.max(revenue.size(), freeCashFlow.size()), eps.size());
     }
 
-    public Double getLatestDebt() {
+    public BigDecimal getLatestDebt() {
         return totalDebt.isEmpty() ? null : totalDebt.get(totalDebt.size() - 1);
     }
 
-    public Double getLatestSharesOutstanding() {
+    public BigDecimal getLatestSharesOutstanding() {
         return ordinarySharesNumber.isEmpty() ? null : ordinarySharesNumber.get(ordinarySharesNumber.size() - 1);
     }
 }

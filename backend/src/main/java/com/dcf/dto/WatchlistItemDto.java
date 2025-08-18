@@ -2,14 +2,15 @@ package com.dcf.dto;
 
 import com.dcf.service.WatchlistService.WatchlistItem;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class WatchlistItemDto {
     private String ticker;
-    private Double fairValuePerShare;
-    private Double currentPrice;
+    private BigDecimal fairValuePerShare;
+    private BigDecimal currentPrice;
     private String valuation;
-    private Double upsideDownsidePercentage;
+    private BigDecimal upsideDownsidePercentage;
     private LocalDateTime lastCalculated;
     private String error;
     private boolean hasCalculation;
@@ -38,19 +39,19 @@ public class WatchlistItemDto {
         this.ticker = ticker;
     }
 
-    public Double getFairValuePerShare() {
+    public BigDecimal getFairValuePerShare() {
         return fairValuePerShare;
     }
 
-    public void setFairValuePerShare(Double fairValuePerShare) {
+    public void setFairValuePerShare(BigDecimal fairValuePerShare) {
         this.fairValuePerShare = fairValuePerShare;
     }
 
-    public Double getCurrentPrice() {
+    public BigDecimal getCurrentPrice() {
         return currentPrice;
     }
 
-    public void setCurrentPrice(Double currentPrice) {
+    public void setCurrentPrice(BigDecimal currentPrice) {
         this.currentPrice = currentPrice;
     }
 
@@ -62,11 +63,11 @@ public class WatchlistItemDto {
         this.valuation = valuation;
     }
 
-    public Double getUpsideDownsidePercentage() {
+    public BigDecimal getUpsideDownsidePercentage() {
         return upsideDownsidePercentage;
     }
 
-    public void setUpsideDownsidePercentage(Double upsideDownsidePercentage) {
+    public void setUpsideDownsidePercentage(BigDecimal upsideDownsidePercentage) {
         this.upsideDownsidePercentage = upsideDownsidePercentage;
     }
 

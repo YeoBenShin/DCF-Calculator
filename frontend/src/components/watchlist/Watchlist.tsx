@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { watchlistService } from '../../services/watchlistService';
 import { authService } from '../../services/authService';
 import { WatchlistItem } from '../../types';
+import { parseBigDecimal } from '../../utils/apiUtils';
 import './Watchlist.css';
 
 const Watchlist: React.FC = () => {
@@ -90,9 +91,15 @@ const Watchlist: React.FC = () => {
     setShowConfirmDialog('');
   };
 
-  const formatPrice = (price: number | undefined): string => {
-    if (price === undefined || price === null) return 'N/A';
-    return `$${price.toFixed(2)}`;
+  const formatPrice = (price: string | undefined): string => {
+    if (price === undefined || price === null || price.trim() === '') return 'N/A';
+    try {
+      const numericPrice = parseBigDecimal(price);
+      return `$${numericPrice.toFixed(2)}`;
+    } catch (error) {
+      console.warn(`Error formatting price: ${price}`, error);
+      return 'N/A';
+    }
   };
 
   const formatDate = (dateString: string | undefined): string => {

@@ -15,35 +15,41 @@ export interface AuthResponse {
   user: User;
 }
 
-// Financial data types
+// Financial data types - BigDecimal values come as strings from backend
 export interface FinancialData {
   ticker: string;
-  revenue: number[];
-  operating_expense: number[];
-  operating_income: number[];
-  operating_cash_flow: number[];
-  net_profit: number[];
-  capital_expenditure: number[];
-  free_cash_flow: number[];
-  eps: number[];
-  total_debt: number[];
-  ordinary_shares_number: number[];
+  revenue: string[];
+  operating_expense: string[];
+  operating_income: string[];
+  operating_cash_flow: string[];
+  net_profit: string[];
+  capital_expenditure: string[];
+  free_cash_flow: string[];
+  eps: string[];
+  total_debt: string[];
+  ordinary_shares_number: string[];
   date_fetched: string;
 }
 
-// DCF calculation types
+// DCF calculation types - BigDecimal values as strings
 export interface DCFInput {
   ticker: string;
-  discountRate: number;
-  growthRate: number;
-  terminalGrowthRate: number;
+  discountRate: string;
+  growthRate: string;
+  terminalGrowthRate: string;
 }
 
 export interface DCFOutput {
   ticker: string;
-  fairValuePerShare: number;
-  currentPrice: number;
+  fairValuePerShare: string;
+  currentPrice: string;
   valuation: 'Undervalued' | 'Overvalued' | 'Fair Value';
+  upsideDownsidePercentage?: string;
+  terminalValue?: string;
+  presentValueOfCashFlows?: string;
+  enterpriseValue?: string;
+  equityValue?: string;
+  sharesOutstanding?: string;
 }
 
 // API response types
@@ -53,11 +59,11 @@ export interface ApiResponse<T> {
   error?: string;
 }
 
-// Watchlist types
+// Watchlist types - BigDecimal values as strings
 export interface WatchlistItem {
   ticker: string;
-  fair_value_per_share?: number;
-  current_price?: number;
+  fair_value_per_share?: string;
+  current_price?: string;
   valuation?: 'Undervalued' | 'Overvalued' | 'Fair Value';
   last_updated?: string;
 }
@@ -66,7 +72,7 @@ export interface WatchlistRequest {
   ticker: string;
 }
 
-// Chart data types
+// Chart data types - values as numbers for display
 export interface ChartDataPoint {
   year: string;
   value: number;

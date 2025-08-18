@@ -15,34 +15,34 @@ jest.mock('recharts', () => ({
   ResponsiveContainer: ({ children }: any) => <div data-testid="responsive-container">{children}</div>,
 }));
 
-// Mock data
+// Mock data - BigDecimal values as strings
 const mockFinancialData: FinancialData = {
   ticker: 'AAPL',
-  revenue: [100000000000, 110000000000, 120000000000],
-  operating_expense: [80000000000, 85000000000, 90000000000],
-  operating_income: [20000000000, 25000000000, 30000000000],
-  operating_cash_flow: [25000000000, 30000000000, 35000000000],
-  net_profit: [15000000000, 20000000000, 25000000000],
-  capital_expenditure: [5000000000, 6000000000, 7000000000],
-  free_cash_flow: [20000000000, 24000000000, 28000000000],
-  eps: [3.50, 4.25, 5.00],
-  total_debt: [50000000000, 55000000000, 60000000000],
-  ordinary_shares_number: [5000000000, 4800000000, 4600000000],
+  revenue: ['100000000000.00', '110000000000.00', '120000000000.00'],
+  operating_expense: ['80000000000.00', '85000000000.00', '90000000000.00'],
+  operating_income: ['20000000000.00', '25000000000.00', '30000000000.00'],
+  operating_cash_flow: ['25000000000.00', '30000000000.00', '35000000000.00'],
+  net_profit: ['15000000000.00', '20000000000.00', '25000000000.00'],
+  capital_expenditure: ['5000000000.00', '6000000000.00', '7000000000.00'],
+  free_cash_flow: ['20000000000.00', '24000000000.00', '28000000000.00'],
+  eps: ['3.50', '4.25', '5.00'],
+  total_debt: ['50000000000.00', '55000000000.00', '60000000000.00'],
+  ordinary_shares_number: ['5000000000.00', '4800000000.00', '4600000000.00'],
   date_fetched: '2025-01-01'
 };
 
 const mockEmptyFinancialData: FinancialData = {
   ticker: 'EMPTY',
-  revenue: [0, 0, 0],
-  operating_expense: [0, 0, 0],
-  operating_income: [0, 0, 0],
-  operating_cash_flow: [0, 0, 0],
-  net_profit: [0, 0, 0],
-  capital_expenditure: [0, 0, 0],
-  free_cash_flow: [0, 0, 0],
-  eps: [0, 0, 0],
-  total_debt: [0, 0, 0],
-  ordinary_shares_number: [0, 0, 0],
+  revenue: ['0.00', '0.00', '0.00'],
+  operating_expense: ['0.00', '0.00', '0.00'],
+  operating_income: ['0.00', '0.00', '0.00'],
+  operating_cash_flow: ['0.00', '0.00', '0.00'],
+  net_profit: ['0.00', '0.00', '0.00'],
+  capital_expenditure: ['0.00', '0.00', '0.00'],
+  free_cash_flow: ['0.00', '0.00', '0.00'],
+  eps: ['0.00', '0.00', '0.00'],
+  total_debt: ['0.00', '0.00', '0.00'],
+  ordinary_shares_number: ['0.00', '0.00', '0.00'],
   date_fetched: '2025-01-01'
 };
 
@@ -170,7 +170,7 @@ describe('FinancialCharts', () => {
   it('shows declining trend for decreasing values', async () => {
     const decliningData: FinancialData = {
       ...mockFinancialData,
-      revenue: [120000000000, 110000000000, 100000000000] // Declining revenue
+      revenue: ['120000000000.00', '110000000000.00', '100000000000.00'] // Declining revenue
     };
 
     render(<FinancialCharts financialData={decliningData} />);
@@ -198,5 +198,74 @@ describe('FinancialCharts', () => {
 
     netIncomeButton.focus();
     expect(document.activeElement).toBe(netIncomeButton);
+  });
+
+  it('handles very large BigDecimal values correctly', async () => {
+    const largeValueData: FinancialData = {
+      ...mockFinancialData,
+      revenue: ['1000000000000000.00', '2000000000000000.00', '3000000000000000.00'], // Quadrillions
+      eps: ['1000.123456', '2000.654321', '3000.987654'] // Large EPS values
+    };
+
+    render(<FinancialCharts financialData={largeValueData} />);
+
+    // Should render without errors
+    expect(screen.getByText('Financial Performance')).toBeInTheDocument();
+    expect(screen.getByText('Revenue Trend')).toBeInTheDocument();
+
+    // Switch to EPS to test large EPS formatting
+    const epsButton = screen.getByText('EPS');
+    fireEvent.click(epsButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Earnings Per Share (EPS) Trend')).toBeInTheDocument();
+    });
+  });
+
+  it('handles very small BigDecimal values correctly', async () => {
+    const smallValueData: FinancialData = {
+      ...mockFinancialData,
+      revenue: ['0.000001', '0.000002', '0.000003'], // Very small values
+      eps: ['0.000123', '0.000456', '0.000789'] // Very small EPS values
+    };
+
+    render(<FinancialCharts financialData={smallValueData} />);
+
+    // Should render without errors
+    expect(screen.getByText('Financial Performance')).toBeInTheDocument();
+    expect(screen.getByText('Revenue Trend')).toBeInTheDocument();
+
+    // Switch to EPS to test small EPS formatting
+    const epsButton = screen.getByText('EPS');
+    fireEvent.click(epsButton);
+
+    await waitFor(() => {
+      expect(screen.getByText('Earnings Per Share (EPS) Trend')).toBeInTheDocument();
+    });
+  });
+
+  it('handles invalid BigDecimal strings gracefully', async () => {
+    const invalidData: FinancialData = {
+      ...mockFinancialData,
+      revenue: ['invalid', 'NaN', ''], // Invalid BigDecimal strings
+      eps: ['not-a-number', '', 'undefined']
+    };
+
+    render(<FinancialCharts financialData={invalidData} />);
+
+    // Should render without errors and show no data message
+    expect(screen.getByText('No data available for Revenue Trend')).toBeInTheDocument();
+  });
+
+  it('displays range information in chart summary', async () => {
+    render(<FinancialCharts financialData={mockFinancialData} />);
+
+    // Wait for chart to load
+    await waitFor(() => {
+      expect(screen.getByText('Range')).toBeInTheDocument();
+    });
+
+    // Should show min and max values
+    expect(screen.getByText('Range')).toBeInTheDocument();
   });
 });

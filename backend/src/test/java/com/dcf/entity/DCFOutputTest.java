@@ -8,6 +8,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -29,8 +30,8 @@ class DCFOutputTest {
     @DisplayName("Valid DCF output should pass validation")
     void testValidDCFOutput() {
         dcfOutput.setTicker("AAPL");
-        dcfOutput.setFairValuePerShare(150.0);
-        dcfOutput.setCurrentPrice(140.0);
+        dcfOutput.setFairValuePerShare(new BigDecimal("150.0"));
+        dcfOutput.setCurrentPrice(new BigDecimal("140.0"));
         dcfOutput.setValuation("Undervalued");
 
         Set<ConstraintViolation<DCFOutput>> violations = validator.validate(dcfOutput);
@@ -41,7 +42,7 @@ class DCFOutputTest {
     @DisplayName("DCF output with blank ticker should fail validation")
     void testBlankTicker() {
         dcfOutput.setTicker("");
-        dcfOutput.setFairValuePerShare(150.0);
+        dcfOutput.setFairValuePerShare(new BigDecimal("150.0"));
         dcfOutput.setValuation("Undervalued");
 
         Set<ConstraintViolation<DCFOutput>> violations = validator.validate(dcfOutput);
@@ -56,7 +57,7 @@ class DCFOutputTest {
     @DisplayName("DCF output with negative fair value should fail validation")
     void testNegativeFairValue() {
         dcfOutput.setTicker("AAPL");
-        dcfOutput.setFairValuePerShare(-50.0);
+        dcfOutput.setFairValuePerShare(new BigDecimal("-50.0"));
         dcfOutput.setValuation("Undervalued");
 
         Set<ConstraintViolation<DCFOutput>> violations = validator.validate(dcfOutput);
@@ -71,8 +72,8 @@ class DCFOutputTest {
     @DisplayName("DCF output with negative current price should fail validation")
     void testNegativeCurrentPrice() {
         dcfOutput.setTicker("AAPL");
-        dcfOutput.setFairValuePerShare(150.0);
-        dcfOutput.setCurrentPrice(-140.0);
+        dcfOutput.setFairValuePerShare(new BigDecimal("150.0"));
+        dcfOutput.setCurrentPrice(new BigDecimal("-140.0"));
         dcfOutput.setValuation("Undervalued");
 
         Set<ConstraintViolation<DCFOutput>> violations = validator.validate(dcfOutput);
@@ -86,93 +87,95 @@ class DCFOutputTest {
     @Test
     @DisplayName("Constructor should set values and calculate upside/downside")
     void testConstructorWithParameters() {
-        DCFOutput output = new DCFOutput("aapl", 150.0, 140.0, "Undervalued");
+        DCFOutput output = new DCFOutput("aapl", new BigDecimal("150.0"), new BigDecimal("140.0"), "Undervalued");
         
         assertEquals("AAPL", output.getTicker());
-        assertEquals(150.0, output.getFairValuePerShare());
-        assertEquals(140.0, output.getCurrentPrice());
+        assertEquals(0, new BigDecimal("150.0").compareTo(output.getFairValuePerShare()));
+        assertEquals(0, new BigDecimal("140.0").compareTo(output.getCurrentPrice()));
         assertEquals("Undervalued", output.getValuation());
         assertNotNull(output.getCalculatedAt());
         
-        // Should calculate upside percentage: (150-140)/140 * 100 = 7.14%
-        assertEquals(7.14, output.getUpsideDownsidePercentage(), 0.01);
+        // Should calculate upside percentage: (150-140)/140 * 100 = 7.142900%
+        BigDecimal expectedUpside = new BigDecimal("7.142900");
+        assertEquals(0, expectedUpside.compareTo(output.getUpsideDownsidePercentage()));
     }
 
     @Test
     @DisplayName("Upside/downside calculation should work correctly")
     void testUpsideDownsideCalculation() {
-        dcfOutput.setFairValuePerShare(200.0);
-        dcfOutput.setCurrentPrice(150.0);
+        dcfOutput.setFairValuePerShare(new BigDecimal("200.0"));
+        dcfOutput.setCurrentPrice(new BigDecimal("150.0"));
         
-        // Should calculate: (200-150)/150 * 100 = 33.33%
-        assertEquals(33.33, dcfOutput.getUpsideDownsidePercentage(), 0.01);
+        // Should calculate: (200-150)/150 * 100 = 33.333300%
+        BigDecimal expectedUpside = new BigDecimal("33.333300");
+        assertEquals(0, expectedUpside.compareTo(dcfOutput.getUpsideDownsidePercentage()));
     }
 
     @Test
     @DisplayName("isUndervalued should work correctly")
     void testIsUndervalued() {
-        dcfOutput.setFairValuePerShare(150.0);
-        dcfOutput.setCurrentPrice(140.0);
+        dcfOutput.setFairValuePerShare(new BigDecimal("150.0"));
+        dcfOutput.setCurrentPrice(new BigDecimal("140.0"));
         assertTrue(dcfOutput.isUndervalued());
         
-        dcfOutput.setCurrentPrice(160.0);
+        dcfOutput.setCurrentPrice(new BigDecimal("160.0"));
         assertFalse(dcfOutput.isUndervalued());
     }
 
     @Test
     @DisplayName("isOvervalued should work correctly")
     void testIsOvervalued() {
-        dcfOutput.setFairValuePerShare(150.0);
-        dcfOutput.setCurrentPrice(160.0);
+        dcfOutput.setFairValuePerShare(new BigDecimal("150.0"));
+        dcfOutput.setCurrentPrice(new BigDecimal("160.0"));
         assertTrue(dcfOutput.isOvervalued());
         
-        dcfOutput.setCurrentPrice(140.0);
+        dcfOutput.setCurrentPrice(new BigDecimal("140.0"));
         assertFalse(dcfOutput.isOvervalued());
     }
 
     @Test
     @DisplayName("isFairlyValued should work correctly")
     void testIsFairlyValued() {
-        dcfOutput.setFairValuePerShare(150.0);
-        dcfOutput.setCurrentPrice(148.0); // Within 5% tolerance
-        assertTrue(dcfOutput.isFairlyValued(5.0));
+        dcfOutput.setFairValuePerShare(new BigDecimal("150.0"));
+        dcfOutput.setCurrentPrice(new BigDecimal("148.0")); // Within 5% tolerance
+        assertTrue(dcfOutput.isFairlyValued(new BigDecimal("5.0")));
         
-        dcfOutput.setCurrentPrice(140.0); // Outside 5% tolerance
-        assertFalse(dcfOutput.isFairlyValued(5.0));
+        dcfOutput.setCurrentPrice(new BigDecimal("140.0")); // Outside 5% tolerance
+        assertFalse(dcfOutput.isFairlyValued(new BigDecimal("5.0")));
     }
 
     @Test
     @DisplayName("getValuationStatus should return correct status")
     void testGetValuationStatus() {
-        dcfOutput.setFairValuePerShare(150.0);
+        dcfOutput.setFairValuePerShare(new BigDecimal("150.0"));
         
-        dcfOutput.setCurrentPrice(148.0); // Within 5% tolerance
+        dcfOutput.setCurrentPrice(new BigDecimal("148.0")); // Within 5% tolerance
         assertEquals("Fair Value", dcfOutput.getValuationStatus());
         
-        dcfOutput.setCurrentPrice(140.0); // Undervalued
+        dcfOutput.setCurrentPrice(new BigDecimal("140.0")); // Undervalued
         assertEquals("Undervalued", dcfOutput.getValuationStatus());
         
-        dcfOutput.setCurrentPrice(160.0); // Overvalued
+        dcfOutput.setCurrentPrice(new BigDecimal("160.0")); // Overvalued
         assertEquals("Overvalued", dcfOutput.getValuationStatus());
     }
 
     @Test
     @DisplayName("getAbsoluteUpside should work correctly")
     void testGetAbsoluteUpside() {
-        dcfOutput.setFairValuePerShare(150.0);
-        dcfOutput.setCurrentPrice(140.0);
+        dcfOutput.setFairValuePerShare(new BigDecimal("150.0"));
+        dcfOutput.setCurrentPrice(new BigDecimal("140.0"));
         
-        assertEquals(10.0, dcfOutput.getAbsoluteUpside());
+        assertEquals(0, new BigDecimal("10.0").compareTo(dcfOutput.getAbsoluteUpside()));
     }
 
     @Test
     @DisplayName("hasSignificantUpside should work correctly")
     void testHasSignificantUpside() {
-        dcfOutput.setFairValuePerShare(150.0);
-        dcfOutput.setCurrentPrice(130.0); // ~15% upside
+        dcfOutput.setFairValuePerShare(new BigDecimal("150.0"));
+        dcfOutput.setCurrentPrice(new BigDecimal("130.0")); // ~15% upside
         
-        assertTrue(dcfOutput.hasSignificantUpside(10.0)); // Above 10% threshold
-        assertFalse(dcfOutput.hasSignificantUpside(20.0)); // Below 20% threshold
+        assertTrue(dcfOutput.hasSignificantUpside(new BigDecimal("10.0"))); // Above 10% threshold
+        assertFalse(dcfOutput.hasSignificantUpside(new BigDecimal("20.0"))); // Below 20% threshold
     }
 
     @Test
@@ -180,10 +183,10 @@ class DCFOutputTest {
     void testNullValueHandling() {
         assertFalse(dcfOutput.isUndervalued());
         assertFalse(dcfOutput.isOvervalued());
-        assertFalse(dcfOutput.isFairlyValued(5.0));
+        assertFalse(dcfOutput.isFairlyValued(new BigDecimal("5.0")));
         assertEquals("Unknown", dcfOutput.getValuationStatus());
         assertNull(dcfOutput.getAbsoluteUpside());
-        assertFalse(dcfOutput.hasSignificantUpside(10.0));
+        assertFalse(dcfOutput.hasSignificantUpside(new BigDecimal("10.0")));
     }
 
     @Test
@@ -209,22 +212,100 @@ class DCFOutputTest {
     @Test
     @DisplayName("Setting fair value should recalculate upside/downside")
     void testFairValueUpdateRecalculation() {
-        dcfOutput.setCurrentPrice(100.0);
-        dcfOutput.setFairValuePerShare(110.0);
-        assertEquals(10.0, dcfOutput.getUpsideDownsidePercentage(), 0.01);
+        dcfOutput.setCurrentPrice(new BigDecimal("100.0"));
+        dcfOutput.setFairValuePerShare(new BigDecimal("110.0"));
+        assertEquals(0, new BigDecimal("10.000000").compareTo(dcfOutput.getUpsideDownsidePercentage()));
         
-        dcfOutput.setFairValuePerShare(120.0);
-        assertEquals(20.0, dcfOutput.getUpsideDownsidePercentage(), 0.01);
+        dcfOutput.setFairValuePerShare(new BigDecimal("120.0"));
+        assertEquals(0, new BigDecimal("20.000000").compareTo(dcfOutput.getUpsideDownsidePercentage()));
     }
 
     @Test
     @DisplayName("Setting current price should recalculate upside/downside")
     void testCurrentPriceUpdateRecalculation() {
-        dcfOutput.setFairValuePerShare(110.0);
-        dcfOutput.setCurrentPrice(100.0);
-        assertEquals(10.0, dcfOutput.getUpsideDownsidePercentage(), 0.01);
+        dcfOutput.setFairValuePerShare(new BigDecimal("110.0"));
+        dcfOutput.setCurrentPrice(new BigDecimal("100.0"));
+        assertEquals(0, new BigDecimal("10.000000").compareTo(dcfOutput.getUpsideDownsidePercentage()));
         
-        dcfOutput.setCurrentPrice(90.0);
-        assertEquals(22.22, dcfOutput.getUpsideDownsidePercentage(), 0.01);
+        dcfOutput.setCurrentPrice(new BigDecimal("90.0"));
+        assertEquals(0, new BigDecimal("22.222200").compareTo(dcfOutput.getUpsideDownsidePercentage()));
+    }
+
+    @Test
+    @DisplayName("BigDecimal precision should be maintained in calculations")
+    void testBigDecimalPrecisionMaintained() {
+        dcfOutput.setFairValuePerShare(new BigDecimal("123.456789"));
+        dcfOutput.setCurrentPrice(new BigDecimal("100.123456"));
+        
+        // Verify precision is maintained in upside calculation
+        BigDecimal expectedUpside = new BigDecimal("23.304600"); // (123.456789 - 100.123456) / 100.123456 * 100
+        assertEquals(0, expectedUpside.compareTo(dcfOutput.getUpsideDownsidePercentage()));
+        
+        // Verify absolute upside maintains precision
+        BigDecimal expectedAbsoluteUpside = new BigDecimal("23.333333");
+        assertEquals(0, expectedAbsoluteUpside.compareTo(dcfOutput.getAbsoluteUpside()));
+    }
+
+    @Test
+    @DisplayName("BigDecimal comparisons should work correctly for edge cases")
+    void testBigDecimalComparisons() {
+        // Test with very small differences
+        dcfOutput.setFairValuePerShare(new BigDecimal("100.000001"));
+        dcfOutput.setCurrentPrice(new BigDecimal("100.000000"));
+        assertTrue(dcfOutput.isUndervalued());
+        
+        // Test with equal values
+        dcfOutput.setFairValuePerShare(new BigDecimal("100.000000"));
+        dcfOutput.setCurrentPrice(new BigDecimal("100.000000"));
+        assertFalse(dcfOutput.isUndervalued());
+        assertFalse(dcfOutput.isOvervalued());
+    }
+
+    @Test
+    @DisplayName("BigDecimal tolerance calculations should work correctly")
+    void testBigDecimalToleranceCalculations() {
+        dcfOutput.setFairValuePerShare(new BigDecimal("100.00"));
+        dcfOutput.setCurrentPrice(new BigDecimal("95.00"));
+        
+        // 5% tolerance: 95 * 0.05 = 4.75, difference is 5.00, so not fairly valued
+        assertFalse(dcfOutput.isFairlyValued(new BigDecimal("5.0")));
+        
+        // 6% tolerance: 95 * 0.06 = 5.70, difference is 5.00, so fairly valued
+        assertTrue(dcfOutput.isFairlyValued(new BigDecimal("6.0")));
+    }
+
+    @Test
+    @DisplayName("BigDecimal rounding should be consistent")
+    void testBigDecimalRounding() {
+        // Test division that requires rounding
+        dcfOutput.setFairValuePerShare(new BigDecimal("100.0"));
+        dcfOutput.setCurrentPrice(new BigDecimal("33.333333"));
+        
+        // Should round to 6 decimal places using HALF_UP
+        BigDecimal expectedUpside = new BigDecimal("200.000000"); // (100 - 33.333333) / 33.333333 * 100
+        assertEquals(0, expectedUpside.compareTo(dcfOutput.getUpsideDownsidePercentage()));
+    }
+
+    @Test
+    @DisplayName("Large BigDecimal values should be handled correctly")
+    void testLargeBigDecimalValues() {
+        // Test with very large values
+        dcfOutput.setFairValuePerShare(new BigDecimal("999999999999.999999"));
+        dcfOutput.setCurrentPrice(new BigDecimal("500000000000.000000"));
+        
+        assertTrue(dcfOutput.isUndervalued());
+        assertEquals(0, new BigDecimal("100.000000").compareTo(dcfOutput.getUpsideDownsidePercentage()));
+    }
+
+    @Test
+    @DisplayName("Zero current price should not cause division by zero")
+    void testZeroCurrentPriceHandling() {
+        dcfOutput.setFairValuePerShare(new BigDecimal("100.0"));
+        dcfOutput.setCurrentPrice(BigDecimal.ZERO);
+        
+        // Should not calculate upside/downside when current price is zero
+        assertNull(dcfOutput.getUpsideDownsidePercentage());
+        assertTrue(dcfOutput.isUndervalued()); // 100 > 0, so it is undervalued
+        assertFalse(dcfOutput.isOvervalued());
     }
 }

@@ -3,6 +3,8 @@ package com.dcf.util;
 import com.dcf.entity.FinancialData;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -30,13 +32,14 @@ public class FinancialDataUtil {
      * @param value the financial value to validate
      * @return true if valid, false otherwise
      */
-    public boolean isValidFinancialValue(Double value) {
+    public boolean isValidFinancialValue(BigDecimal value) {
         if (value == null) {
             return false;
         }
         
-        // Check for reasonable bounds (not infinite, not NaN)
-        return Double.isFinite(value) && Math.abs(value) < 1e15;
+        // Check for reasonable bounds (not too large)
+        BigDecimal maxValue = new BigDecimal("1E15");
+        return value.abs().compareTo(maxValue) < 0;
     }
 
     /**
@@ -44,7 +47,7 @@ public class FinancialDataUtil {
      * @param values the list of values to validate
      * @return true if all values are valid, false otherwise
      */
-    public boolean isValidFinancialValueList(List<Double> values) {
+    public boolean isValidFinancialValueList(List<BigDecimal> values) {
         if (values == null) {
             return true; // Empty list is valid
         }
@@ -168,20 +171,20 @@ public class FinancialDataUtil {
      * @param financialData the financial data
      * @return average revenue growth rate or null if insufficient data
      */
-    public Double calculateRevenueGrowthRate(FinancialData financialData) {
+    public BigDecimal calculateRevenueGrowthRate(FinancialData financialData) {
         if (financialData == null || financialData.getRevenue().size() < 2) {
             return null;
         }
         
-        List<Double> revenue = financialData.getRevenue();
-        List<Double> growthRates = new ArrayList<>();
+        List<BigDecimal> revenue = financialData.getRevenue();
+        List<BigDecimal> growthRates = new ArrayList<>();
         
         for (int i = 1; i < revenue.size(); i++) {
-            Double previousYear = revenue.get(i - 1);
-            Double currentYear = revenue.get(i);
+            BigDecimal previousYear = revenue.get(i - 1);
+            BigDecimal currentYear = revenue.get(i);
             
-            if (previousYear != null && currentYear != null && previousYear != 0) {
-                double growthRate = (currentYear - previousYear) / previousYear;
+            if (previousYear != null && currentYear != null && previousYear.compareTo(BigDecimal.ZERO) != 0) {
+                BigDecimal growthRate = currentYear.subtract(previousYear).divide(previousYear, 10, RoundingMode.HALF_UP);
                 growthRates.add(growthRate);
             }
         }
@@ -190,6 +193,7 @@ public class FinancialDataUtil {
             return null;
         }
         
-        return growthRates.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+        BigDecimal sum = growthRates.stream().reduce(BigDecimal.ZERO, BigDecimal::add);
+        return sum.divide(new BigDecimal(growthRates.size()), 10, RoundingMode.HALF_UP);
     }
 }

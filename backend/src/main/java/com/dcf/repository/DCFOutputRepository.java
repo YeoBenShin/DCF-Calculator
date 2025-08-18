@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -71,7 +72,7 @@ public interface DCFOutputRepository extends JpaRepository<DCFOutput, String> {
      * @return list of DCF outputs with significant upside
      */
     @Query("SELECT d FROM DCFOutput d WHERE d.upsideDownsidePercentage > :threshold ORDER BY d.upsideDownsidePercentage DESC")
-    List<DCFOutput> findWithUpsideAbove(@Param("threshold") Double upsideThreshold);
+    List<DCFOutput> findWithUpsideAbove(@Param("threshold") BigDecimal upsideThreshold);
     
     /**
      * Find DCF outputs calculated after a specific date
@@ -100,7 +101,7 @@ public interface DCFOutputRepository extends JpaRepository<DCFOutput, String> {
      * @return average fair value per share
      */
     @Query("SELECT AVG(d.fairValuePerShare) FROM DCFOutput d WHERE d.ticker = :ticker")
-    Double getAverageFairValueByTicker(@Param("ticker") String ticker);
+    BigDecimal getAverageFairValueByTicker(@Param("ticker") String ticker);
     
     /**
      * Delete old DCF outputs before a specific date

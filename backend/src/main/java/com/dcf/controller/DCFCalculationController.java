@@ -11,6 +11,8 @@ import com.dcf.service.DCFCalculationService.DCFCalculationStats;
 import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -86,9 +88,15 @@ public class DCFCalculationController {
             // Convert DTO to entity
             DCFInput dcfInput = convertToEntity(dcfInputDto, userId);
             
-            // Define sensitivity ranges
-            double[] growthRateRange = {-0.05, 0.0, 0.05, 0.10, 0.15, 0.20}; // -5% to 20%
-            double[] discountRateRange = {0.08, 0.10, 0.12, 0.15, 0.18, 0.20}; // 8% to 20%
+            // Define sensitivity ranges (as percentages)
+            BigDecimal[] growthRateRange = {
+                new BigDecimal("-5.0"), new BigDecimal("0.0"), new BigDecimal("5.0"), 
+                new BigDecimal("10.0"), new BigDecimal("15.0"), new BigDecimal("20.0")
+            }; // -5% to 20%
+            BigDecimal[] discountRateRange = {
+                new BigDecimal("8.0"), new BigDecimal("10.0"), new BigDecimal("12.0"), 
+                new BigDecimal("15.0"), new BigDecimal("18.0"), new BigDecimal("20.0")
+            }; // 8% to 20%
             
             // Perform sensitivity analysis
             DCFSensitivityAnalysis analysis = dcfCalculationService.calculateSensitivityAnalysis(
@@ -234,10 +242,20 @@ public class DCFCalculationController {
      */
     private DCFOutputDto convertToDto(DCFOutput entity) {
         DCFOutputDto dto = new DCFOutputDto();
+        dto.setId(entity.getId());
         dto.setTicker(entity.getTicker());
         dto.setFairValuePerShare(entity.getFairValuePerShare());
         dto.setCurrentPrice(entity.getCurrentPrice());
         dto.setValuation(entity.getValuation());
+        dto.setUpsideDownsidePercentage(entity.getUpsideDownsidePercentage());
+        dto.setTerminalValue(entity.getTerminalValue());
+        dto.setPresentValueOfCashFlows(entity.getPresentValueOfCashFlows());
+        dto.setEnterpriseValue(entity.getEnterpriseValue());
+        dto.setEquityValue(entity.getEquityValue());
+        dto.setSharesOutstanding(entity.getSharesOutstanding());
+        dto.setDcfInputId(entity.getDcfInputId());
+        dto.setUserId(entity.getUserId());
+        dto.setCalculatedAt(entity.getCalculatedAt());
         return dto;
     }
 

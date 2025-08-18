@@ -1,5 +1,7 @@
 package com.dcf.dto;
 
+import java.math.BigDecimal;
+
 import com.dcf.service.WatchlistService.WatchlistStats;
 
 public class WatchlistStatsDto {
@@ -7,12 +9,13 @@ public class WatchlistStatsDto {
     private long undervaluedCount;
     private long overvaluedCount;
     private long fairValueCount;
-    private double averageUpside;
-    private double undervaluedPercentage;
-    private double overvaluedPercentage;
-    private double fairValuePercentage;
+    private BigDecimal averageUpside;
+    private BigDecimal undervaluedPercentage;
+    private BigDecimal overvaluedPercentage;
+    private BigDecimal fairValuePercentage;
 
-    public WatchlistStatsDto() {}
+    public WatchlistStatsDto() {
+    }
 
     public WatchlistStatsDto(WatchlistStats stats) {
         this.totalStocks = stats.getTotalStocks();
@@ -58,35 +61,35 @@ public class WatchlistStatsDto {
         this.fairValueCount = fairValueCount;
     }
 
-    public double getAverageUpside() {
+    public BigDecimal getAverageUpside() {
         return averageUpside;
     }
 
-    public void setAverageUpside(double averageUpside) {
+    public void setAverageUpside(BigDecimal averageUpside) {
         this.averageUpside = averageUpside;
     }
 
-    public double getUndervaluedPercentage() {
+    public BigDecimal getUndervaluedPercentage() {
         return undervaluedPercentage;
     }
 
-    public void setUndervaluedPercentage(double undervaluedPercentage) {
+    public void setUndervaluedPercentage(BigDecimal undervaluedPercentage) {
         this.undervaluedPercentage = undervaluedPercentage;
     }
 
-    public double getOvervaluedPercentage() {
+    public BigDecimal getOvervaluedPercentage() {
         return overvaluedPercentage;
     }
 
-    public void setOvervaluedPercentage(double overvaluedPercentage) {
+    public void setOvervaluedPercentage(BigDecimal overvaluedPercentage) {
         this.overvaluedPercentage = overvaluedPercentage;
     }
 
-    public double getFairValuePercentage() {
+    public BigDecimal getFairValuePercentage() {
         return fairValuePercentage;
     }
 
-    public void setFairValuePercentage(double fairValuePercentage) {
+    public void setFairValuePercentage(BigDecimal fairValuePercentage) {
         this.fairValuePercentage = fairValuePercentage;
     }
 }

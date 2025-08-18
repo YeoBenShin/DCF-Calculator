@@ -3,20 +3,20 @@ import { render, screen } from '@testing-library/react';
 import FairValueCard from '../FairValueCard';
 import { DCFOutput, DCFInput } from '../../../types';
 
-// Mock data
+// Mock data - BigDecimal values as strings
 const mockDCFInput: DCFInput = {
   ticker: 'AAPL',
-  discountRate: 10,
-  growthRate: 15,
-  terminalGrowthRate: 2.5
+  discountRate: '10.00',
+  growthRate: '15.00',
+  terminalGrowthRate: '2.50'
 };
 
 describe('FairValueCard', () => {
   it('renders undervalued stock correctly', () => {
     const undervaluedResult: DCFOutput = {
       ticker: 'AAPL',
-      fair_value_per_share: 175.50,
-      current_price: 150.00,
+      fairValuePerShare: '175.50',
+      currentPrice: '150.00',
       valuation: 'Undervalued'
     };
 
@@ -34,16 +34,16 @@ describe('FairValueCard', () => {
     expect(screen.getByText('+17.0%')).toBeInTheDocument();
 
     // Check DCF parameters
-    expect(screen.getByText('10%')).toBeInTheDocument();
-    expect(screen.getByText('15%')).toBeInTheDocument();
-    expect(screen.getByText('2.5%')).toBeInTheDocument();
+    expect(screen.getByText('10.00%')).toBeInTheDocument();
+    expect(screen.getByText('15.00%')).toBeInTheDocument();
+    expect(screen.getByText('2.50%')).toBeInTheDocument();
   });
 
   it('renders overvalued stock correctly', () => {
     const overvaluedResult: DCFOutput = {
       ticker: 'TSLA',
-      fair_value_per_share: 200.00,
-      current_price: 250.00,
+      fairValuePerShare: '200.00',
+      currentPrice: '250.00',
       valuation: 'Overvalued'
     };
 
@@ -60,8 +60,8 @@ describe('FairValueCard', () => {
   it('renders fair value stock correctly', () => {
     const fairValueResult: DCFOutput = {
       ticker: 'MSFT',
-      fair_value_per_share: 300.00,
-      current_price: 300.00,
+      fairValuePerShare: '300.00',
+      currentPrice: '300.00',
       valuation: 'Fair Value'
     };
 
@@ -79,8 +79,8 @@ describe('FairValueCard', () => {
   it('displays correct valuation icons', () => {
     const undervaluedResult: DCFOutput = {
       ticker: 'AAPL',
-      fair_value_per_share: 175.50,
-      current_price: 150.00,
+      fairValuePerShare: '175.50',
+      currentPrice: '150.00',
       valuation: 'Undervalued'
     };
 
@@ -93,8 +93,8 @@ describe('FairValueCard', () => {
   it('displays DCF parameters correctly', () => {
     const dcfResult: DCFOutput = {
       ticker: 'AAPL',
-      fair_value_per_share: 175.50,
-      current_price: 150.00,
+      fairValuePerShare: '175.50',
+      currentPrice: '150.00',
       valuation: 'Undervalued'
     };
 
@@ -109,8 +109,8 @@ describe('FairValueCard', () => {
   it('displays disclaimer', () => {
     const dcfResult: DCFOutput = {
       ticker: 'AAPL',
-      fair_value_per_share: 175.50,
-      current_price: 150.00,
+      fairValuePerShare: '175.50',
+      currentPrice: '150.00',
       valuation: 'Undervalued'
     };
 
@@ -123,8 +123,8 @@ describe('FairValueCard', () => {
   it('handles decimal precision correctly', () => {
     const dcfResult: DCFOutput = {
       ticker: 'AAPL',
-      fair_value_per_share: 175.567,
-      current_price: 150.123,
+      fairValuePerShare: '175.567',
+      currentPrice: '150.123',
       valuation: 'Undervalued'
     };
 
@@ -139,8 +139,8 @@ describe('FairValueCard', () => {
     // Test positive upside
     const positiveUpsideResult: DCFOutput = {
       ticker: 'AAPL',
-      fair_value_per_share: 120.00,
-      current_price: 100.00,
+      fairValuePerShare: '120.00',
+      currentPrice: '100.00',
       valuation: 'Undervalued'
     };
 
@@ -150,8 +150,8 @@ describe('FairValueCard', () => {
     // Test negative upside (downside)
     const negativeUpsideResult: DCFOutput = {
       ticker: 'AAPL',
-      fair_value_per_share: 80.00,
-      current_price: 100.00,
+      fairValuePerShare: '80.00',
+      currentPrice: '100.00',
       valuation: 'Overvalued'
     };
 

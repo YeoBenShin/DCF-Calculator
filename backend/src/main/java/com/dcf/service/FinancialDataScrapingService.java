@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,9 +72,13 @@ public class FinancialDataScrapingService {
         logger.info("Scraping fresh financial data for ticker: {}", normalizedTicker);
         FinancialData financialData = scrapeFinancialData(normalizedTicker);
 
+        // Normalize data arrays to have consistent lengths
+        normalizeDataArrays(financialData);
+
         // Validate the scraped data
         String validationError = financialDataUtil.getValidationError(financialData);
         if (validationError != null) {
+            logger.error("Validation failed for ticker {}: {}", normalizedTicker, validationError);
             throw new FinancialDataException("Invalid financial data: " + validationError);
         }
 
@@ -170,30 +176,29 @@ public class FinancialDataScrapingService {
             context.route("**/*.{png,jpg,jpeg,svg,woff,css}", route -> route.abort());
             Page page = context.newPage();
             page.navigate(url, new Page.NavigateOptions()
-                .setWaitUntil(WaitUntilState.DOMCONTENTLOADED)  // Wait for DOM content only, faster than full load
-                .setTimeout(30000));
-
+                    .setWaitUntil(WaitUntilState.DOMCONTENTLOADED) // Wait for DOM content only, faster than full load
+                    .setTimeout(30000));
 
             // Extract revenue data
-            List<Double> revenue = extractFinancialMetric(page, "Total Revenue");
+            List<BigDecimal> revenue = extractFinancialMetric(page, "Total Revenue");
             if (!revenue.isEmpty()) {
                 financialData.setRevenue(revenue);
             }
 
             // Extract operating income
-            List<Double> operatingIncome = extractFinancialMetric(page, "Operating Income");
+            List<BigDecimal> operatingIncome = extractFinancialMetric(page, "Operating Income");
             if (!operatingIncome.isEmpty()) {
                 financialData.setOperatingIncome(operatingIncome);
             }
 
             // Extract net income
-            List<Double> netProfit = extractFinancialMetric(page, "Net Income");
+            List<BigDecimal> netProfit = extractFinancialMetric(page, "Net Income");
             if (!netProfit.isEmpty()) {
                 financialData.setNetProfit(netProfit);
             }
 
             // Extract EPS
-            List<Double> eps = extractFinancialMetric(page, "Diluted EPS");
+            List<BigDecimal> eps = extractFinancialMetric(page, "Diluted EPS");
             if (!eps.isEmpty()) {
                 financialData.setEps(eps);
             }
@@ -222,23 +227,23 @@ public class FinancialDataScrapingService {
             context.route("**/*.{png,jpg,jpeg,svg,woff,css}", route -> route.abort());
             Page page = context.newPage();
             page.navigate(url, new Page.NavigateOptions()
-                .setWaitUntil(WaitUntilState.DOMCONTENTLOADED)  // Wait for DOM content only, faster than full load
-                .setTimeout(30000));
+                    .setWaitUntil(WaitUntilState.DOMCONTENTLOADED) // Wait for DOM content only, faster than full load
+                    .setTimeout(30000));
 
             // Extract operating cash flow
-            List<Double> operatingCashFlow = extractFinancialMetric(page, "Operating Cash Flow");
+            List<BigDecimal> operatingCashFlow = extractFinancialMetric(page, "Operating Cash Flow");
             if (!operatingCashFlow.isEmpty()) {
                 financialData.setOperatingCashFlow(operatingCashFlow);
             }
 
             // Extract capital expenditure
-            List<Double> capex = extractFinancialMetric(page, "Capital Expenditure");
+            List<BigDecimal> capex = extractFinancialMetric(page, "Capital Expenditure");
             if (!capex.isEmpty()) {
                 financialData.setCapitalExpenditure(capex);
             }
 
             // Extract free cash flow
-            List<Double> freeCashFlow = extractFinancialMetric(page, "Free Cash Flow");
+            List<BigDecimal> freeCashFlow = extractFinancialMetric(page, "Free Cash Flow");
             if (!freeCashFlow.isEmpty()) {
                 financialData.setFreeCashFlow(freeCashFlow);
             }
@@ -259,7 +264,7 @@ public class FinancialDataScrapingService {
      * @return true if successful
      */
     private boolean scrapeBalanceSheet(FinancialData financialData, String ticker) {
-        try (Playwright playwright = Playwright.create()){
+        try (Playwright playwright = Playwright.create()) {
             String url = String.format("https://finance.yahoo.com/quote/%s/balance-sheet", ticker);
 
             Browser browser = playwright.chromium().launch(new BrowserType.LaunchOptions().setHeadless(true));
@@ -267,17 +272,17 @@ public class FinancialDataScrapingService {
             context.route("**/*.{png,jpg,jpeg,svg,woff,css}", route -> route.abort());
             Page page = context.newPage();
             page.navigate(url, new Page.NavigateOptions()
-                .setWaitUntil(WaitUntilState.DOMCONTENTLOADED)  // Wait for DOM content only, faster than full load
-                .setTimeout(30000));
+                    .setWaitUntil(WaitUntilState.DOMCONTENTLOADED) // Wait for DOM content only, faster than full load
+                    .setTimeout(30000));
 
             // Extract total debt
-            List<Double> totalDebt = extractFinancialMetric(page, "Total Debt");
+            List<BigDecimal> totalDebt = extractFinancialMetric(page, "Total Debt");
             if (!totalDebt.isEmpty()) {
                 financialData.setTotalDebt(totalDebt);
             }
 
             // Extract shares outstanding
-            List<Double> sharesOutstanding = extractFinancialMetric(page, "Ordinary Shares Number");
+            List<BigDecimal> sharesOutstanding = extractFinancialMetric(page, "Ordinary Shares Number");
             if (!sharesOutstanding.isEmpty()) {
                 financialData.setOrdinarySharesNumber(sharesOutstanding);
             }
@@ -297,8 +302,8 @@ public class FinancialDataScrapingService {
      * @param metricName the name of the metric to extract
      * @return list of values for the metric
      */
-    private List<Double> extractFinancialMetric(Page page, String metricName) {
-        List<Double> values = new ArrayList<>();
+    private List<BigDecimal> extractFinancialMetric(Page page, String metricName) {
+        List<BigDecimal> values = new ArrayList<>();
 
         try {
             String xmlSelector = null;
@@ -313,7 +318,7 @@ public class FinancialDataScrapingService {
                     xmlSelector = "//*[@id=\"main-content-wrapper\"]/article/section/div/div/div[2]/div[11]";
                     break;
                 case "Diluted EPS":
-                    xmlSelector = "//*[@id=\"main-content-wrapper\"]/article/section/div/div/div[2]/div[16]";
+                    xmlSelector = "//*[@id=\"main-content-wrapper\"]/article/section/div/div/div[2]/div[13]";
                     break;
                 case "Operating Cash Flow":
                     xmlSelector = "//*[@id=\"main-content-wrapper\"]/article/section/div/div/div[2]/div[1]";
@@ -322,7 +327,13 @@ public class FinancialDataScrapingService {
                     xmlSelector = "//*[@id=\"main-content-wrapper\"]/article/section/div/div/div[2]/div[7]";
                     break;
                 case "Free Cash Flow":
-                    xmlSelector = "//*[@id=\"main-content-wrapper\"]/article/section/div/div/div[2]/div[11]";
+                    xmlSelector = "//*[@id=\"main-content-wrapper\"]/article/section/div/div/div[2]/div[12]"; // different
+                                                                                                              // stock
+                                                                                                              // got
+                                                                                                              // different
+                                                                                                              // number
+                                                                                                              // of
+                                                                                                              // items
                     break;
                 case "Total Debt":
                     xmlSelector = "//*[@id=\"main-content-wrapper\"]/article/section/div/div/div[2]/div[11]";
@@ -331,11 +342,11 @@ public class FinancialDataScrapingService {
                     xmlSelector = "//*[@id=\"main-content-wrapper\"]/article/section/div/div/div[2]/div[13]";
                     break;
                 default:
-                
+
             }
             if (xmlSelector != null) {
                 Locator rows = page.locator(xmlSelector);
-                List<String>valueList = rows.allTextContents();
+                List<String> valueList = rows.allTextContents();
                 logger.info("valueList that is being passed back: {}", valueList);
                 if (valueList.size() <= 0) {
                     return values;
@@ -343,7 +354,7 @@ public class FinancialDataScrapingService {
 
                 String[] valueArray = valueList.get(0).split(" ");
                 for (String valueText : valueArray) {
-                    Double value = parseFinancialValue(valueText);
+                    BigDecimal value = parseFinancialValue(valueText);
                     if (value != null) {
                         values.add(value);
                     }
@@ -353,64 +364,74 @@ public class FinancialDataScrapingService {
             logger.error("Error extracting metric: {}", metricName, e);
         }
 
-        logger.info("{} values that is being passed back: {}",metricName, values);
+        logger.info("{} values that is being passed back: {}", metricName, values);
         return values;
     }
 
     /**
-     * Parse financial value from text (handles K, M, B suffixes)
+     * Parse financial value from text (handles K, M, B suffixes and scientific
+     * notation)
      * 
      * @param valueText the text to parse
      * @return parsed value or null if invalid
      */
-    private Double parseFinancialValue(String valueText) {
+    private BigDecimal parseFinancialValue(String valueText) {
         if (valueText == null || valueText.isEmpty() || valueText.equals("-") || valueText.equals("--")) {
             return null;
         }
 
         try {
-            // Remove commas and parentheses
-            String cleanValue = valueText.replaceAll("[,()]", "");
+            // Remove commas and parentheses, preserve negative sign
+            String cleanValue = valueText.replaceAll("[,()]", "").trim();
 
-            // Handle negative values in parentheses
-            boolean isNegative = valueText.contains("(") && valueText.contains(")");
+            // Handle negative values (check for minus sign or parentheses in original)
+            // boolean isNegative = valueText.contains("-") || (valueText.contains("(") &&
+            // valueText.contains(")"));
 
-            // Extract numeric part and suffix
-            String numericPart = cleanValue.replaceAll("[^0-9.]", "");
-            String suffix = cleanValue.replaceAll("[0-9.,()-]", "").toUpperCase();
-
+            // Remove any remaining non-numeric characters except decimal point, and +/-
+            String numericPart = cleanValue.replaceAll("[^0-9.+-]", "");
             if (numericPart.isEmpty()) {
                 return null;
             }
+            BigDecimal value = new BigDecimal(numericPart);
 
-            double value = Double.parseDouble(numericPart);
+            // logger.info("isNegative value: {} || value that is being pssed back {}",
+            // isNegative, value);
+            // // Handle scientific notation and regular decimal numbers
+            // BigDecimal value;
+            // if (numericPart.toUpperCase().contains("E")) {
+            // // Scientific notation - BigDecimal can handle this directly
+            // value = new BigDecimal(numericPart);
+            // } else {
+            // // Regular decimal number
+            // value = new BigDecimal(numericPart);
+            // }
 
-            // Apply multiplier based on suffix
-            switch (suffix) {
-                case "K":
-                    value *= 1_000;
-                    break;
-                case "M":
-                    value *= 1_000_000;
-                    break;
-                case "B":
-                    value *= 1_000_000_000;
-                    break;
-                case "T":
-                    value *= 1_000_000_000_000L;
-                    break;
-            }
+            // // Handle suffix multipliers (K, M, B, T)
+            // String upperValue = cleanValue.toUpperCase();
+            // if (upperValue.contains("K")) {
+            // value = value.multiply(new BigDecimal("1000"));
+            // } else if (upperValue.contains("M")) {
+            // value = value.multiply(new BigDecimal("1000000"));
+            // } else if (upperValue.contains("B")) {
+            // value = value.multiply(new BigDecimal("1000000000"));
+            // } else if (upperValue.contains("T")) {
+            // value = value.multiply(new BigDecimal("1000000000000"));
+            // }
 
-            return isNegative ? -value : value;
+            // logger.info("negative value {}", value.negate());
+
+            return value;
 
         } catch (NumberFormatException e) {
-            logger.warn("Could not parse financial value: {}", valueText);
+            logger.warn("Could not parse financial value: '{}' - {}", valueText, e.getMessage());
             return null;
         }
     }
 
     /**
-     * Generate realistic financial data based on actual company data
+     * Generate realistic financial data based on actual company data using
+     * BigDecimal arithmetic
      * 
      * @param ticker the ticker symbol
      * @return FinancialData with realistic data
@@ -421,25 +442,35 @@ public class FinancialDataScrapingService {
         // Use more realistic data based on actual company financials
         CompanyFinancials companyData = getRealisticCompanyData(ticker);
 
-        List<Double> revenue = new ArrayList<>();
-        List<Double> operatingIncome = new ArrayList<>();
-        List<Double> netProfit = new ArrayList<>();
-        List<Double> operatingCashFlow = new ArrayList<>();
-        List<Double> freeCashFlow = new ArrayList<>();
-        List<Double> eps = new ArrayList<>();
-        List<Double> totalDebt = new ArrayList<>();
-        List<Double> sharesOutstanding = new ArrayList<>();
+        List<BigDecimal> revenue = new ArrayList<>();
+        List<BigDecimal> operatingIncome = new ArrayList<>();
+        List<BigDecimal> netProfit = new ArrayList<>();
+        List<BigDecimal> operatingCashFlow = new ArrayList<>();
+        List<BigDecimal> freeCashFlow = new ArrayList<>();
+        List<BigDecimal> eps = new ArrayList<>();
+        List<BigDecimal> totalDebt = new ArrayList<>();
+        List<BigDecimal> sharesOutstanding = new ArrayList<>();
 
         // Generate 4 years of historical data (most recent first)
         for (int i = 3; i >= 0; i--) {
-            double yearFactor = Math.pow(companyData.growthRate, i);
+            // Calculate year factor using BigDecimal arithmetic for precision
+            BigDecimal yearFactor = companyData.growthRate.pow(i);
 
-            revenue.add(companyData.baseRevenue * yearFactor);
-            operatingIncome.add(companyData.baseRevenue * yearFactor * companyData.operatingMargin);
-            netProfit.add(companyData.baseRevenue * yearFactor * companyData.netMargin);
-            operatingCashFlow.add(companyData.baseRevenue * yearFactor * companyData.cashFlowMargin);
-            freeCashFlow.add(companyData.baseRevenue * yearFactor * companyData.fcfMargin);
-            eps.add((companyData.baseRevenue * yearFactor * companyData.netMargin) / companyData.sharesOutstanding);
+            // Calculate financial metrics using BigDecimal operations
+            BigDecimal yearRevenue = companyData.baseRevenue.multiply(yearFactor);
+            revenue.add(yearRevenue);
+
+            operatingIncome.add(yearRevenue.multiply(companyData.operatingMargin));
+            netProfit.add(yearRevenue.multiply(companyData.netMargin));
+            operatingCashFlow.add(yearRevenue.multiply(companyData.cashFlowMargin));
+            freeCashFlow.add(yearRevenue.multiply(companyData.fcfMargin));
+
+            // Calculate EPS: (revenue * netMargin) / sharesOutstanding
+            BigDecimal netIncome = yearRevenue.multiply(companyData.netMargin);
+            BigDecimal epsValue = netIncome.divide(companyData.sharesOutstanding, 6, RoundingMode.HALF_UP);
+            eps.add(epsValue);
+
+            // Debt and shares remain constant across years
             totalDebt.add(companyData.totalDebt);
             sharesOutstanding.add(companyData.sharesOutstanding);
         }
@@ -457,7 +488,7 @@ public class FinancialDataScrapingService {
     }
 
     /**
-     * Get realistic company financial data
+     * Get realistic company financial data using BigDecimal for precision
      * 
      * @param ticker the ticker symbol
      * @return CompanyFinancials object with realistic data
@@ -466,145 +497,120 @@ public class FinancialDataScrapingService {
         switch (ticker.toUpperCase()) {
             case "AAPL":
                 return new CompanyFinancials(
-                        394_328_000_000.0, // Revenue (2023)
-                        0.30, // Operating margin
-                        0.25, // Net margin
-                        0.28, // Cash flow margin
-                        0.24, // FCF margin
-                        15_728_700_000.0, // Shares outstanding
-                        111_100_000_000.0, // Total debt
-                        1.08 // Growth rate
+                        "394328000000", // Revenue (2023)
+                        "0.30", // Operating margin
+                        "0.25", // Net margin
+                        "0.28", // Cash flow margin
+                        "0.24", // FCF margin
+                        "15728700000", // Shares outstanding
+                        "111100000000", // Total debt
+                        "1.08" // Growth rate
                 );
             case "GOOGL":
             case "GOOG":
                 return new CompanyFinancials(
-                        307_394_000_000.0, // Revenue (2023)
-                        0.25, // Operating margin
-                        0.21, // Net margin
-                        0.30, // Cash flow margin
-                        0.25, // FCF margin
-                        12_700_000_000.0, // Shares outstanding
-                        28_300_000_000.0, // Total debt
-                        1.12 // Growth rate
+                        "307394000000", // Revenue (2023)
+                        "0.25", // Operating margin
+                        "0.21", // Net margin
+                        "0.30", // Cash flow margin
+                        "0.25", // FCF margin
+                        "12700000000", // Shares outstanding
+                        "28300000000", // Total debt
+                        "1.12" // Growth rate
                 );
             case "MSFT":
                 return new CompanyFinancials(
-                        211_915_000_000.0, // Revenue (2023)
-                        0.42, // Operating margin
-                        0.36, // Net margin
-                        0.35, // Cash flow margin
-                        0.28, // FCF margin
-                        7_430_000_000.0, // Shares outstanding
-                        47_032_000_000.0, // Total debt
-                        1.10 // Growth rate
+                        "211915000000", // Revenue (2023)
+                        "0.42", // Operating margin
+                        "0.36", // Net margin
+                        "0.35", // Cash flow margin
+                        "0.28", // FCF margin
+                        "7430000000", // Shares outstanding
+                        "47032000000", // Total debt
+                        "1.10" // Growth rate
                 );
             case "AMZN":
                 return new CompanyFinancials(
-                        574_785_000_000.0, // Revenue (2023)
-                        0.05, // Operating margin
-                        0.02, // Net margin
-                        0.15, // Cash flow margin
-                        0.08, // FCF margin
-                        10_757_000_000.0, // Shares outstanding
-                        67_150_000_000.0, // Total debt
-                        1.15 // Growth rate
+                        "574785000000", // Revenue (2023)
+                        "0.05", // Operating margin
+                        "0.02", // Net margin
+                        "0.15", // Cash flow margin
+                        "0.08", // FCF margin
+                        "10757000000", // Shares outstanding
+                        "67150000000", // Total debt
+                        "1.15" // Growth rate
                 );
             case "TSLA":
                 return new CompanyFinancials(
-                        96_773_000_000.0, // Revenue (2023)
-                        0.08, // Operating margin
-                        0.15, // Net margin
-                        0.12, // Cash flow margin
-                        0.08, // FCF margin
-                        3_178_000_000.0, // Shares outstanding
-                        9_566_000_000.0, // Total debt
-                        1.20 // Growth rate
+                        "96773000000", // Revenue (2023)
+                        "0.08", // Operating margin
+                        "0.15", // Net margin
+                        "0.12", // Cash flow margin
+                        "0.08", // FCF margin
+                        "3178000000", // Shares outstanding
+                        "9566000000", // Total debt
+                        "1.20" // Growth rate
                 );
             case "META":
                 return new CompanyFinancials(
-                        134_902_000_000.0, // Revenue (2023)
-                        0.29, // Operating margin
-                        0.26, // Net margin
-                        0.32, // Cash flow margin
-                        0.28, // FCF margin
-                        2_587_000_000.0, // Shares outstanding
-                        18_385_000_000.0, // Total debt
-                        1.11 // Growth rate
+                        "134902000000", // Revenue (2023)
+                        "0.29", // Operating margin
+                        "0.26", // Net margin
+                        "0.32", // Cash flow margin
+                        "0.28", // FCF margin
+                        "2587000000", // Shares outstanding
+                        "18385000000", // Total debt
+                        "1.11" // Growth rate
                 );
             case "NVDA":
                 return new CompanyFinancials(
-                        60_922_000_000.0, // Revenue (2023)
-                        0.32, // Operating margin
-                        0.49, // Net margin
-                        0.35, // Cash flow margin
-                        0.30, // FCF margin
-                        24_700_000_000.0, // Shares outstanding
-                        9_706_000_000.0, // Total debt
-                        1.35 // Growth rate
+                        "60922000000", // Revenue (2023)
+                        "0.32", // Operating margin
+                        "0.49", // Net margin
+                        "0.35", // Cash flow margin
+                        "0.30", // FCF margin
+                        "24700000000", // Shares outstanding
+                        "9706000000", // Total debt
+                        "1.35" // Growth rate
                 );
             default:
                 return new CompanyFinancials(
-                        50_000_000_000.0, // Default revenue
-                        0.15, // Operating margin
-                        0.10, // Net margin
-                        0.18, // Cash flow margin
-                        0.12, // FCF margin
-                        1_000_000_000.0, // Shares outstanding
-                        20_000_000_000.0, // Total debt
-                        1.08 // Growth rate
+                        "50000000000", // Default revenue
+                        "0.15", // Operating margin
+                        "0.10", // Net margin
+                        "0.18", // Cash flow margin
+                        "0.12", // FCF margin
+                        "1000000000", // Shares outstanding
+                        "20000000000", // Total debt
+                        "1.08" // Growth rate
                 );
         }
     }
 
     /**
-     * Helper class to store company financial data
+     * Helper class to store company financial data using BigDecimal for precision
      */
     private static class CompanyFinancials {
-        final double baseRevenue;
-        final double operatingMargin;
-        final double netMargin;
-        final double cashFlowMargin;
-        final double fcfMargin;
-        final double sharesOutstanding;
-        final double totalDebt;
-        final double growthRate;
+        final BigDecimal baseRevenue;
+        final BigDecimal operatingMargin;
+        final BigDecimal netMargin;
+        final BigDecimal cashFlowMargin;
+        final BigDecimal fcfMargin;
+        final BigDecimal sharesOutstanding;
+        final BigDecimal totalDebt;
+        final BigDecimal growthRate;
 
-        CompanyFinancials(double baseRevenue, double operatingMargin, double netMargin,
-                double cashFlowMargin, double fcfMargin, double sharesOutstanding,
-                double totalDebt, double growthRate) {
-            this.baseRevenue = baseRevenue;
-            this.operatingMargin = operatingMargin;
-            this.netMargin = netMargin;
-            this.cashFlowMargin = cashFlowMargin;
-            this.fcfMargin = fcfMargin;
-            this.sharesOutstanding = sharesOutstanding;
-            this.totalDebt = totalDebt;
-            this.growthRate = growthRate;
-        }
-    }
-
-    /**
-     * Get base revenue for mock data generation
-     * 
-     * @param ticker the ticker symbol
-     * @return base revenue amount
-     */
-    private double getBaseRevenueForTicker(String ticker) {
-        // Return different base revenues for different tickers
-        switch (ticker.toUpperCase()) {
-            case "AAPL":
-                return 365_000_000_000.0; // $365B
-            case "GOOGL":
-            case "GOOG":
-                return 280_000_000_000.0; // $280B
-            case "MSFT":
-                return 200_000_000_000.0; // $200B
-            case "AMZN":
-                return 470_000_000_000.0; // $470B
-            case "TSLA":
-                return 80_000_000_000.0; // $80B
-            default:
-                return 50_000_000_000.0; // $50B default
+        CompanyFinancials(String baseRevenue, String operatingMargin, String netMargin,
+                String cashFlowMargin, String fcfMargin, String sharesOutstanding,
+                String totalDebt, String growthRate) {
+            this.baseRevenue = new BigDecimal(baseRevenue);
+            this.operatingMargin = new BigDecimal(operatingMargin);
+            this.netMargin = new BigDecimal(netMargin);
+            this.cashFlowMargin = new BigDecimal(cashFlowMargin);
+            this.fcfMargin = new BigDecimal(fcfMargin);
+            this.sharesOutstanding = new BigDecimal(sharesOutstanding);
+            this.totalDebt = new BigDecimal(totalDebt);
+            this.growthRate = new BigDecimal(growthRate);
         }
     }
 
@@ -655,6 +661,116 @@ public class FinancialDataScrapingService {
         } catch (Exception e) {
             logger.error("Error validating ticker: {}", ticker, e);
             return false;
+        }
+    }
+
+    /**
+     * Log the sizes of scraped data arrays for debugging
+     * 
+     * @param financialData the financial data to log
+     */
+    private void logScrapedDataSizes(FinancialData financialData) {
+        logger.info(
+                "Scraped data sizes for ticker {}: Revenue={}, OperatingExpense={}, OperatingIncome={}, NetProfit={}, "
+                        +
+                        "OperatingCashFlow={}, CapitalExpenditure={}, FreeCashFlow={}, EPS={}, TotalDebt={}, SharesOutstanding={}",
+                financialData.getTicker(),
+                financialData.getRevenue().size(),
+                financialData.getOperatingExpense().size(),
+                financialData.getOperatingIncome().size(),
+                financialData.getNetProfit().size(),
+                financialData.getOperatingCashFlow().size(),
+                financialData.getCapitalExpenditure().size(),
+                financialData.getFreeCashFlow().size(),
+                financialData.getEps().size(),
+                financialData.getTotalDebt().size(),
+                financialData.getOrdinarySharesNumber().size());
+    }
+
+    /**
+     * Normalize data arrays to have consistent lengths by truncating to the
+     * shortest non-empty array
+     * 
+     * @param financialData the financial data to normalize
+     */
+    private void normalizeDataArrays(FinancialData financialData) {
+        // Find the minimum length among non-empty arrays
+        int minLength = Integer.MAX_VALUE;
+
+        if (!financialData.getRevenue().isEmpty()) {
+            minLength = Math.min(minLength, financialData.getRevenue().size());
+        }
+        if (!financialData.getOperatingExpense().isEmpty()) {
+            minLength = Math.min(minLength, financialData.getOperatingExpense().size());
+        }
+        if (!financialData.getOperatingIncome().isEmpty()) {
+            minLength = Math.min(minLength, financialData.getOperatingIncome().size());
+        }
+        if (!financialData.getNetProfit().isEmpty()) {
+            minLength = Math.min(minLength, financialData.getNetProfit().size());
+        }
+        if (!financialData.getOperatingCashFlow().isEmpty()) {
+            minLength = Math.min(minLength, financialData.getOperatingCashFlow().size());
+        }
+        if (!financialData.getCapitalExpenditure().isEmpty()) {
+            minLength = Math.min(minLength, financialData.getCapitalExpenditure().size());
+        }
+        if (!financialData.getFreeCashFlow().isEmpty()) {
+            minLength = Math.min(minLength, financialData.getFreeCashFlow().size());
+        }
+        if (!financialData.getEps().isEmpty()) {
+            minLength = Math.min(minLength, financialData.getEps().size());
+        }
+        if (!financialData.getTotalDebt().isEmpty()) {
+            minLength = Math.min(minLength, financialData.getTotalDebt().size());
+        }
+        if (!financialData.getOrdinarySharesNumber().isEmpty()) {
+            minLength = Math.min(minLength, financialData.getOrdinarySharesNumber().size());
+        }
+
+        // If no data found or minLength is still MAX_VALUE, return
+        if (minLength == Integer.MAX_VALUE || minLength <= 0) {
+            logger.warn("No valid data arrays found for normalization");
+            return;
+        }
+
+        logger.info("Normalizing data arrays to length: {}", minLength);
+
+        // Truncate all non-empty arrays to the minimum length (create new lists to
+        // avoid view issues)
+        if (!financialData.getRevenue().isEmpty()) {
+            financialData.setRevenue(new ArrayList<>(financialData.getRevenue().subList(0, minLength)));
+        }
+        if (!financialData.getOperatingExpense().isEmpty()) {
+            financialData
+                    .setOperatingExpense(new ArrayList<>(financialData.getOperatingExpense().subList(0, minLength)));
+        }
+        if (!financialData.getOperatingIncome().isEmpty()) {
+            financialData.setOperatingIncome(new ArrayList<>(financialData.getOperatingIncome().subList(0, minLength)));
+        }
+        if (!financialData.getNetProfit().isEmpty()) {
+            financialData.setNetProfit(new ArrayList<>(financialData.getNetProfit().subList(0, minLength)));
+        }
+        if (!financialData.getOperatingCashFlow().isEmpty()) {
+            financialData
+                    .setOperatingCashFlow(new ArrayList<>(financialData.getOperatingCashFlow().subList(0, minLength)));
+        }
+        if (!financialData.getCapitalExpenditure().isEmpty()) {
+            financialData.setCapitalExpenditure(
+                    new ArrayList<>(financialData.getCapitalExpenditure().subList(0, minLength)));
+        }
+        if (!financialData.getFreeCashFlow().isEmpty()) {
+            financialData.setFreeCashFlow(new ArrayList<>(financialData.getFreeCashFlow().subList(0, minLength)));
+        }
+        if (!financialData.getEps().isEmpty()) {
+            financialData.setEps(new ArrayList<>(financialData.getEps().subList(0, minLength)));
+        }
+        if (!financialData.getTotalDebt().isEmpty()) {
+            financialData.setTotalDebt(new ArrayList<>(financialData.getTotalDebt().subList(0, minLength)));
+        }
+        if (!financialData.getOrdinarySharesNumber().isEmpty()) {
+            financialData.setOrdinarySharesNumber(
+                    new ArrayList<>(financialData.getOrdinarySharesNumber().subList(0, minLength)));
         }
     }
 

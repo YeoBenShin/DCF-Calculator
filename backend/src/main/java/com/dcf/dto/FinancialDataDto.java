@@ -1,39 +1,41 @@
 package com.dcf.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class FinancialDataDto {
     private String ticker;
-    private List<Double> revenue;
+    private List<BigDecimal> revenue;
     
     @JsonProperty("operating_expense")
-    private List<Double> operatingExpense;
+    private List<BigDecimal> operatingExpense;
     
     @JsonProperty("operating_income")
-    private List<Double> operatingIncome;
+    private List<BigDecimal> operatingIncome;
     
     @JsonProperty("operating_cash_flow")
-    private List<Double> operatingCashFlow;
+    private List<BigDecimal> operatingCashFlow;
     
     @JsonProperty("net_profit")
-    private List<Double> netProfit;
+    private List<BigDecimal> netProfit;
     
     @JsonProperty("capital_expenditure")
-    private List<Double> capitalExpenditure;
+    private List<BigDecimal> capitalExpenditure;
     
     @JsonProperty("free_cash_flow")
-    private List<Double> freeCashFlow;
+    private List<BigDecimal> freeCashFlow;
     
-    private List<Double> eps;
+    private List<BigDecimal> eps;
     
     @JsonProperty("total_debt")
-    private List<Double> totalDebt;
+    private List<BigDecimal> totalDebt;
     
     @JsonProperty("ordinary_shares_number")
-    private List<Double> ordinarySharesNumber;
+    private List<BigDecimal> ordinarySharesNumber;
     
     @JsonProperty("date_fetched")
     private String dateFetched;
@@ -49,83 +51,83 @@ public class FinancialDataDto {
         this.ticker = ticker;
     }
 
-    public List<Double> getRevenue() {
+    public List<BigDecimal> getRevenue() {
         return revenue;
     }
 
-    public void setRevenue(List<Double> revenue) {
+    public void setRevenue(List<BigDecimal> revenue) {
         this.revenue = revenue;
     }
 
-    public List<Double> getOperatingExpense() {
+    public List<BigDecimal> getOperatingExpense() {
         return operatingExpense;
     }
 
-    public void setOperatingExpense(List<Double> operatingExpense) {
+    public void setOperatingExpense(List<BigDecimal> operatingExpense) {
         this.operatingExpense = operatingExpense;
     }
 
-    public List<Double> getOperatingIncome() {
+    public List<BigDecimal> getOperatingIncome() {
         return operatingIncome;
     }
 
-    public void setOperatingIncome(List<Double> operatingIncome) {
+    public void setOperatingIncome(List<BigDecimal> operatingIncome) {
         this.operatingIncome = operatingIncome;
     }
 
-    public List<Double> getOperatingCashFlow() {
+    public List<BigDecimal> getOperatingCashFlow() {
         return operatingCashFlow;
     }
 
-    public void setOperatingCashFlow(List<Double> operatingCashFlow) {
+    public void setOperatingCashFlow(List<BigDecimal> operatingCashFlow) {
         this.operatingCashFlow = operatingCashFlow;
     }
 
-    public List<Double> getNetProfit() {
+    public List<BigDecimal> getNetProfit() {
         return netProfit;
     }
 
-    public void setNetProfit(List<Double> netProfit) {
+    public void setNetProfit(List<BigDecimal> netProfit) {
         this.netProfit = netProfit;
     }
 
-    public List<Double> getCapitalExpenditure() {
+    public List<BigDecimal> getCapitalExpenditure() {
         return capitalExpenditure;
     }
 
-    public void setCapitalExpenditure(List<Double> capitalExpenditure) {
+    public void setCapitalExpenditure(List<BigDecimal> capitalExpenditure) {
         this.capitalExpenditure = capitalExpenditure;
     }
 
-    public List<Double> getFreeCashFlow() {
+    public List<BigDecimal> getFreeCashFlow() {
         return freeCashFlow;
     }
 
-    public void setFreeCashFlow(List<Double> freeCashFlow) {
+    public void setFreeCashFlow(List<BigDecimal> freeCashFlow) {
         this.freeCashFlow = freeCashFlow;
     }
 
-    public List<Double> getEps() {
+    public List<BigDecimal> getEps() {
         return eps;
     }
 
-    public void setEps(List<Double> eps) {
+    public void setEps(List<BigDecimal> eps) {
         this.eps = eps;
     }
 
-    public List<Double> getTotalDebt() {
+    public List<BigDecimal> getTotalDebt() {
         return totalDebt;
     }
 
-    public void setTotalDebt(List<Double> totalDebt) {
+    public void setTotalDebt(List<BigDecimal> totalDebt) {
         this.totalDebt = totalDebt;
     }
 
-    public List<Double> getOrdinarySharesNumber() {
+    public List<BigDecimal> getOrdinarySharesNumber() {
         return ordinarySharesNumber;
     }
 
-    public void setOrdinarySharesNumber(List<Double> ordinarySharesNumber) {
+    public void setOrdinarySharesNumber(List<BigDecimal> ordinarySharesNumber) {
         this.ordinarySharesNumber = ordinarySharesNumber;
     }
 

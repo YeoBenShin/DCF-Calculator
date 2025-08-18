@@ -1,6 +1,5 @@
 package com.dcf.controller;
 
-import com.dcf.entity.FinancialData;
 import com.dcf.repository.FinancialDataRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,9 +15,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
 
-import java.time.LocalDate;
-import java.util.Arrays;
-
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,9 +29,6 @@ class FinancialDataControllerIntegrationTest {
 
     @Autowired
     private FinancialDataRepository financialDataRepository;
-
-    @Autowired
-    private ObjectMapper objectMapper;
 
     private MockMvc mockMvc;
 
@@ -71,13 +64,10 @@ class FinancialDataControllerIntegrationTest {
     @DisplayName("Integration Test: Validate popular tickers")
     void testValidatePopularTickers() throws Exception {
         // Get popular tickers
-        String popularResponse = mockMvc.perform(get("/financials/popular")
+        mockMvc.perform(get("/financials/popular")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.tickers").isArray())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+                .andExpect(jsonPath("$.tickers").isArray());
 
         // Extract first ticker and validate it
         mockMvc.perform(get("/financials/validate")
@@ -189,5 +179,69 @@ class FinancialDataControllerIntegrationTest {
                 .param("ticker", "AAPL@#$")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("Integration Test: BigDecimal serialization in financial data")
+    void testBigDecimalSerializationInFinancialData() throws Exception {
+        String response = mockMvc.perform(get("/financials")
+                .param("ticker", "AAPL")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.revenue").isArray())
+                .andExpect(jsonPath("$.data.operatingIncome").isArray())
+                .andExpect(jsonPath("$.data.freeCashFlow").isArray())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // Verify that BigDecimal values are serialized as plain strings, not scientific notation
+        assert !response.contains("E");
+        assert !response.contains("e");
+    }
+
+    @Test
+    @DisplayName("Integration Test: Financial data BigDecimal precision")
+    void testFinancialDataBigDecimalPrecision() throws Exception {
+        mockMvc.perform(get("/financials")
+                .param("ticker", "AAPL")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.ticker").value("AAPL"))
+                .andExpect(jsonPath("$.data.revenue").isArray())
+                .andExpect(jsonPath("$.data.operatingExpense").isArray())
+                .andExpect(jsonPath("$.data.operatingIncome").isArray())
+                .andExpect(jsonPath("$.data.operatingCashFlow").isArray())
+                .andExpect(jsonPath("$.data.netProfit").isArray())
+                .andExpect(jsonPath("$.data.capitalExpenditure").isArray())
+                .andExpect(jsonPath("$.data.freeCashFlow").isArray())
+                .andExpect(jsonPath("$.data.eps").isArray())
+                .andExpect(jsonPath("$.data.totalDebt").isArray())
+                .andExpect(jsonPath("$.data.ordinarySharesNumber").isArray());
+    }
+
+    @Test
+    @DisplayName("Integration Test: Financial data consistency across multiple requests")
+    void testFinancialDataConsistencyAcrossMultipleRequests() throws Exception {
+        // First request
+        String response1 = mockMvc.perform(get("/financials")
+                .param("ticker", "MSFT")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // Second request (should return same data from cache)
+        String response2 = mockMvc.perform(get("/financials")
+                .param("ticker", "MSFT")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        // Verify responses are identical (BigDecimal precision maintained)
+        assert response1.equals(response2);
     }
 }

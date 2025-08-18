@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -64,7 +65,7 @@ public interface DCFInputRepository extends JpaRepository<DCFInput, String> {
      * @return list of DCF inputs with high growth rates
      */
     @Query("SELECT d FROM DCFInput d WHERE d.growthRate > :threshold ORDER BY d.growthRate DESC")
-    List<DCFInput> findByGrowthRateGreaterThan(@Param("threshold") Double threshold);
+    List<DCFInput> findByGrowthRateGreaterThan(@Param("threshold") BigDecimal threshold);
     
     /**
      * Find unique tickers that have been analyzed

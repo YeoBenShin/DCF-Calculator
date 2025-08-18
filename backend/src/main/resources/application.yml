@@ -5,6 +5,11 @@ spring:
   application:
     name: dcf-calculator-backend
   
+  # Jackson configuration for BigDecimal serialization
+  jackson:
+    generator:
+      write-bigdecimal-as-plain: true
+  
   # Database configuration
   datasource:
     url: ${SUPABASE_DATABASE_URL}
@@ -23,7 +28,7 @@ spring:
   jpa:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto:  create-drop # update (in production)
+      ddl-auto: update # create-drop # update (in production)
     show-sql: true
     properties:
       hibernate:

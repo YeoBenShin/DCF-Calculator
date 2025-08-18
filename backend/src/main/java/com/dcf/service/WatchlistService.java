@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -212,11 +214,13 @@ public class WatchlistService {
             .mapToLong(item -> "Fair Value".equals(item.getValuation()) ? 1 : 0)
             .sum();
 
-        double averageUpside = watchlistItems.stream()
+        BigDecimal averageUpside = watchlistItems.stream()
             .filter(item -> item.getUpsideDownsidePercentage() != null)
-            .mapToDouble(WatchlistItem::getUpsideDownsidePercentage)
-            .average()
-            .orElse(0.0);
+            .map(WatchlistItem::getUpsideDownsidePercentage)
+            .reduce(BigDecimal.ZERO, BigDecimal::add)
+            .divide(new BigDecimal(Math.max(1, watchlistItems.stream()
+                .mapToInt(item -> item.getUpsideDownsidePercentage() != null ? 1 : 0)
+                .sum())), 6, RoundingMode.HALF_UP);
 
         return new WatchlistStats(totalStocks, undervaluedCount, overvaluedCount, fairValueCount, averageUpside);
     }
@@ -300,10 +304,10 @@ public class WatchlistService {
      */
     public static class WatchlistItem {
         private String ticker;
-        private Double fairValuePerShare;
-        private Double currentPrice;
+        private BigDecimal fairValuePerShare;
+        private BigDecimal currentPrice;
         private String valuation;
-        private Double upsideDownsidePercentage;
+        private BigDecimal upsideDownsidePercentage;
         private LocalDateTime lastCalculated;
         private String error;
 
@@ -311,17 +315,17 @@ public class WatchlistService {
         public String getTicker() { return ticker; }
         public void setTicker(String ticker) { this.ticker = ticker; }
 
-        public Double getFairValuePerShare() { return fairValuePerShare; }
-        public void setFairValuePerShare(Double fairValuePerShare) { this.fairValuePerShare = fairValuePerShare; }
+        public BigDecimal getFairValuePerShare() { return fairValuePerShare; }
+        public void setFairValuePerShare(BigDecimal fairValuePerShare) { this.fairValuePerShare = fairValuePerShare; }
 
-        public Double getCurrentPrice() { return currentPrice; }
-        public void setCurrentPrice(Double currentPrice) { this.currentPrice = currentPrice; }
+        public BigDecimal getCurrentPrice() { return currentPrice; }
+        public void setCurrentPrice(BigDecimal currentPrice) { this.currentPrice = currentPrice; }
 
         public String getValuation() { return valuation; }
         public void setValuation(String valuation) { this.valuation = valuation; }
 
-        public Double getUpsideDownsidePercentage() { return upsideDownsidePercentage; }
-        public void setUpsideDownsidePercentage(Double upsideDownsidePercentage) { this.upsideDownsidePercentage = upsideDownsidePercentage; }
+        public BigDecimal getUpsideDownsidePercentage() { return upsideDownsidePercentage; }
+        public void setUpsideDownsidePercentage(BigDecimal upsideDownsidePercentage) { this.upsideDownsidePercentage = upsideDownsidePercentage; }
 
         public LocalDateTime getLastCalculated() { return lastCalculated; }
         public void setLastCalculated(LocalDateTime lastCalculated) { this.lastCalculated = lastCalculated; }
@@ -341,10 +345,10 @@ public class WatchlistService {
         private final long undervaluedCount;
         private final long overvaluedCount;
         private final long fairValueCount;
-        private final double averageUpside;
+        private final BigDecimal averageUpside;
 
         public WatchlistStats(long totalStocks, long undervaluedCount, long overvaluedCount, 
-                             long fairValueCount, double averageUpside) {
+                             long fairValueCount, BigDecimal averageUpside) {
             this.totalStocks = totalStocks;
             this.undervaluedCount = undervaluedCount;
             this.overvaluedCount = overvaluedCount;
@@ -356,18 +360,24 @@ public class WatchlistService {
         public long getUndervaluedCount() { return undervaluedCount; }
         public long getOvervaluedCount() { return overvaluedCount; }
         public long getFairValueCount() { return fairValueCount; }
-        public double getAverageUpside() { return averageUpside; }
+        public BigDecimal getAverageUpside() { return averageUpside; }
 
-        public double getUndervaluedPercentage() {
-            return totalStocks > 0 ? (double) undervaluedCount / totalStocks * 100 : 0;
+        public BigDecimal getUndervaluedPercentage() {
+            return totalStocks > 0 ? 
+                new BigDecimal(undervaluedCount).divide(new BigDecimal(totalStocks), 4, RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal("100")) : BigDecimal.ZERO;
         }
 
-        public double getOvervaluedPercentage() {
-            return totalStocks > 0 ? (double) overvaluedCount / totalStocks * 100 : 0;
+        public BigDecimal getOvervaluedPercentage() {
+            return totalStocks > 0 ? 
+                new BigDecimal(overvaluedCount).divide(new BigDecimal(totalStocks), 4, RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal("100")) : BigDecimal.ZERO;
         }
 
-        public double getFairValuePercentage() {
-            return totalStocks > 0 ? (double) fairValueCount / totalStocks * 100 : 0;
+        public BigDecimal getFairValuePercentage() {
+            return totalStocks > 0 ? 
+                new BigDecimal(fairValueCount).divide(new BigDecimal(totalStocks), 4, RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal("100")) : BigDecimal.ZERO;
         }
     }
 

@@ -1,32 +1,34 @@
 package com.dcf.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+
+import jakarta.validation.constraints.*;
+import java.math.BigDecimal;
 
 public class DCFInputDto {
     @NotBlank(message = "Ticker is required")
     private String ticker;
 
     @NotNull(message = "Discount rate is required")
-    @Min(value = 0, message = "Discount rate must be positive")
-    @Max(value = 100, message = "Discount rate must be less than 100%")
-    private Double discountRate;
+    @DecimalMin(value = "0.0", message = "Discount rate must be positive")
+    @DecimalMax(value = "100.0", message = "Discount rate must be less than 100%")
+    @Digits(integer = 4, fraction = 6, message = "Invalid discount rate format")
+    private BigDecimal discountRate;
 
     @NotNull(message = "Growth rate is required")
-    @Min(value = -100, message = "Growth rate must be greater than -100%")
-    @Max(value = 1000, message = "Growth rate must be less than 1000%")
-    private Double growthRate;
+    @DecimalMin(value = "-100.0", message = "Growth rate must be greater than -100%")
+    @DecimalMax(value = "1000.0", message = "Growth rate must be less than 1000%")
+    @Digits(integer = 4, fraction = 6, message = "Invalid growth rate format")
+    private BigDecimal growthRate;
 
     @NotNull(message = "Terminal growth rate is required")
-    @Min(value = 0, message = "Terminal growth rate must be positive")
-    @Max(value = 10, message = "Terminal growth rate must be less than 10%")
-    private Double terminalGrowthRate;
+    @DecimalMin(value = "0.0", message = "Terminal growth rate must be positive")
+    @DecimalMax(value = "10.0", message = "Terminal growth rate must be less than 10%")
+    @Digits(integer = 4, fraction = 6, message = "Invalid terminal growth rate format")
+    private BigDecimal terminalGrowthRate;
 
     public DCFInputDto() {}
 
-    public DCFInputDto(String ticker, Double discountRate, Double growthRate, Double terminalGrowthRate) {
+    public DCFInputDto(String ticker, BigDecimal discountRate, BigDecimal growthRate, BigDecimal terminalGrowthRate) {
         this.ticker = ticker;
         this.discountRate = discountRate;
         this.growthRate = growthRate;
@@ -42,27 +44,27 @@ public class DCFInputDto {
         this.ticker = ticker;
     }
 
-    public Double getDiscountRate() {
+    public BigDecimal getDiscountRate() {
         return discountRate;
     }
 
-    public void setDiscountRate(Double discountRate) {
+    public void setDiscountRate(BigDecimal discountRate) {
         this.discountRate = discountRate;
     }
 
-    public Double getGrowthRate() {
+    public BigDecimal getGrowthRate() {
         return growthRate;
     }
 
-    public void setGrowthRate(Double growthRate) {
+    public void setGrowthRate(BigDecimal growthRate) {
         this.growthRate = growthRate;
     }
 
-    public Double getTerminalGrowthRate() {
+    public BigDecimal getTerminalGrowthRate() {
         return terminalGrowthRate;
     }
 
-    public void setTerminalGrowthRate(Double terminalGrowthRate) {
+    public void setTerminalGrowthRate(BigDecimal terminalGrowthRate) {
         this.terminalGrowthRate = terminalGrowthRate;
     }
 }
